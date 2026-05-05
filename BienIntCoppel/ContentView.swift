@@ -9,14 +9,16 @@ struct ContentView: View {
             // MARK: - Home Tab
             MainView()
                 .tabItem {
-                    Label("Home", systemImage: "house")
+                    Image(systemName: "house")
+                    Text("Home")
                 }
                 .tag(0)
             
             // MARK: - Comunidad Tab
             ComunidadView()
                 .tabItem {
-                    Label("Comunidad", systemImage: "person.2")
+                    Image(systemName: "person.2")
+                    Text("Comunidad")
                 }
                 .tag(1)
             
@@ -33,8 +35,8 @@ struct ContentView: View {
                     Label("Ajustes", systemImage: "gearshape")
                 }
                 .tag(3)
-            .accentColor(.orange)
         }
+        .accentColor(.orange)
     }
         
 

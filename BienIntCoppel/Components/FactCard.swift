@@ -22,7 +22,7 @@ struct FactCardView: View {
                 
                 Spacer()
                 
-                Image(systemName: "lightbulb.fill") // Replace with Image(ficha.image)
+                Image(systemName: "lightbulb") 
                     .font(.title)
                     .foregroundStyle(.yellow)
             }
