@@ -1,52 +1,89 @@
-//
-//  UserHeader.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 19 on 04/05/26.
-//
+struct UserHeaderView: View {
+    @State private var user: User? = nil
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            // 1. Gradient Background with Rounded Bottom
+            LinearGradient(
+                colors: [Color.orange.opacity(0.8), Color.orange.opacity(0.6), Color.emerald.opacity(0.5)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .clipShape(RoundedCorner(radius: 32, corners: [.bottomLeft, .bottomRight]))
+            .ignoresSafeArea(edges: .top)
+            
+            // 2. Content
+            HStack(spacing: 12) {
+                // Avatar
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.3))
+                        .frame(width: 48, height: 48)
+                        .overlay(
+                            Circle().stroke(Color.white.opacity(0.6), lineWidth: 2)
+                        )
+                    
+                    Text(user?.initials ?? "U")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+                
+                // Welcome Text
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Bienvenido de vuelta")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.white.opacity(0.8))
+                    
+                    Text("¡Hola \(user?.firstName ?? "Usuario")!")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                
+                Spacer()
+                
+                // Notification Button
+                Button(action: { /* Action */ }) {
+                    Image(systemName: "bell.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Color.white.opacity(0.2))
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle().stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 24) // Spacing from bottom of header
+        }
+        .frame(height: 140) // Fixed height for header area
+        .onAppear {
+            fetchUser()
+        }
+    }
+    
+    // Faux API Call
+    private func fetchUser() {
+        // Simulating base44.auth.me()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.user = User(fullName: "Ana Ramírez")
+        }
+    }
+}
 
-import { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { Bell } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+// Reusing the RoundedCorner shape from the previous component
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
+}
 
-export default function UserHeader() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-  }, []);
-
-  const name = user?.full_name?.split(" ")[0] || "Usuario";
-  const initials = user?.full_name
-    ? user.full_name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-    : "U";
-
-  return (
-    <div className="relative overflow-hidden rounded-b-3xl">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-300 to-emerald-300 opacity-90" />
-      <div className="relative px-5 pt-12 pb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-12 h-12 border-2 border-white/60 shadow-lg">
-              <AvatarFallback className="bg-white/30 text-white font-heading font-bold text-lg">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-white/80 text-xs font-body font-medium">Bienvenido de vuelta</p>
-              <h1 className="text-white text-xl font-heading font-bold">¡Hola {name}!</h1>
-            </div>
-          </div>
-          <button
-            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center transition-transform hover:scale-105"
-            aria-label="Notificaciones"
-          >
-            <Bell className="w-5 h-5 text-white" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+// Extension for the emerald color
+extension Color {
+    static let emerald = Color(red: 16/255, green: 185/255, blue: 129/255)
 }
