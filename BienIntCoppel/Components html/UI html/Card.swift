@@ -1,57 +1,134 @@
-//
-//  Card.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 19 on 04/05/26.
-//
+import SwiftUI
 
-import * as React from "react"
+// MARK: - Card Main Container
+struct Card<Content: View>: View {
+    let content: Content
+    
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            content
+        }
+        .background(Color(.systemBackground)) // bg-card
+        .cornerRadius(12) // rounded-xl
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.separator).opacity(0.5), lineWidth: 1) // border
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1) // shadow
+    }
+}
 
-import { cn } from "@/lib/utils"
+// MARK: - Card Header
+struct CardHeader<Content: View>: View {
+    let content: Content
+    
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) { // space-y-1.5
+            content
+        }
+        .padding(24) // p-6
+    }
+}
 
-const Card = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("rounded-xl border bg-card text-card-foreground shadow", className)}
-    {...props} />
-))
-Card.displayName = "Card"
+// MARK: - Card Title
+struct CardTitle: View {
+    let text: String
+    
+    init(_ text: String) {
+        self.text = text
+    }
+    
+    var body: some View {
+        Text(text)
+            .font(.system(size: 20, weight: .semibold)) // font-semibold
+            .tracking(-0.5) // tracking-tight
+            .foregroundColor(.primary)
+    }
+}
 
-const CardHeader = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props} />
-))
-CardHeader.displayName = "CardHeader"
+// MARK: - Card Description
+struct CardDescription: View {
+    let text: String
+    
+    init(_ text: String) {
+        self.text = text
+    }
+    
+    var body: some View {
+        Text(text)
+            .font(.subheadline) // text-sm
+            .foregroundColor(.secondary) // text-muted-foreground
+    }
+}
 
-const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
-    {...props} />
-))
-CardTitle.displayName = "CardTitle"
+// MARK: - Card Content
+struct CardContent<Content: View>: View {
+    let content: Content
+    
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            content
+        }
+        .padding([.horizontal, .bottom], 24) // p-6 pt-0
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
 
-const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props} />
-))
-CardDescription.displayName = "CardDescription"
+// MARK: - Card Footer
+struct CardFooter<Content: View>: View {
+    let content: Content
+    
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        HStack {
+            content
+        }
+        .padding([.horizontal, .bottom], 24) // p-6 pt-0
+    }
+}
 
-const CardContent = React.forwardRef(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
-
-const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props} />
-))
-CardFooter.displayName = "CardFooter"
-
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+// MARK: - Preview Usage
+struct Card_Previews: PreviewProvider {
+    static var previews: some View {
+        ZStack {
+            Color(white: 0.98).edgesIgnoringSafeArea(.all)
+            
+            VStack(spacing: 20) {
+                Card {
+                    CardHeader {
+                        CardTitle("Notificación de Bienestar")
+                        CardDescription("Tienes un nuevo reto disponible.")
+                    }
+                    CardContent {
+                        Text("Completa 10 minutos de meditación para ganar puntos adicionales en tu racha semanal.")
+                            .font(.body)
+                    }
+                    CardFooter {
+                        Button("Aceptar") { }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.orange)
+                        
+                        Button("Más tarde") { }
+                            .buttonStyle(.bordered)
+                    }
+                }
+                .padding()
+            }
+        }
+    }
+}

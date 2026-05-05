@@ -1,80 +1,71 @@
-//
-//  ContentView.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 11 on 04/05/26.
-//
-
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @State private var selectedTab = 0
+    
     var body: some View {
-        NavigationViewWrapper {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        NavigationStack {
+            TabView(selection: $selectedTab) {
+                // MARK: - Home Tab
+                MainView()
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
                     }
-                }
-                .onDelete(perform: deleteItems)
-            }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    .tag(0)
+                
+                // MARK: - Comunidad Tab
+                ComunidadView()
+                    .tabItem {
+                        Label("Comunidad", systemImage: "person.2.fill")
                     }
-                }
+                    .tag(1)
+                
+                // MARK: - Preguntas Tab
+                PreguntasView()
+                    .tabItem {
+                        Label("Preguntas", systemImage: "bubble.left.fill")
+                    }
+                    .tag(2)
+                
+                // MARK: - Ajustes Tab
+                AjustessView()
+                    .tabItem {
+                        Label("Ajustes", systemImage: "gearshape.fill")
+                    }
+                    .tag(3)
             }
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
+            .accentColor(.orange) // Matches the highlight color in your image
         }
     }
 }
 
-fileprivate struct NavigationViewWrapper<Content: View>: View {
-    let content: () -> Content
+// MARK: - Placeholder Views
+// These are placeholders so the code compiles. You can replace them with your actual files.
 
+struct ComunidadView: View {
     var body: some View {
-#if os(macOS)
-        NavigationSplitView {
-            content()
-        } detail: {
-            Text("Select an item lol")
-        }
-#else
-        content()
-#endif
+        Text("Comunidad View")
+            .font(.title)
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+struct PreguntasView: View {
+    var body: some View {
+        Text("Preguntas View")
+            .font(.title)
+    }
+}
+
+struct SettingsView: View {
+    var body: some View {
+        Text("Ajustes View")
+            .font(.title)
+    }
+}
+
+// Ensure your existing MainView is in the same project!
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }

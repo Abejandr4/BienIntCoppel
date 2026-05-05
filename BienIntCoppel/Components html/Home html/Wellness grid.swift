@@ -1,3 +1,5 @@
+import SwiftUI
+
 struct WellnessGrid: View {
     // 1. Configuración de las tarjetas
     let cards = [

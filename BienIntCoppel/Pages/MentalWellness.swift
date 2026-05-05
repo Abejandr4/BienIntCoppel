@@ -1,56 +1,125 @@
-//
-//  MentalWellness.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 19 on 04/05/26.
-//
+import SwiftUI
 
-import { Link } from "react-router-dom";
-import { ArrowLeft, Brain } from "lucide-react";
-import CompanyStats from "@/components/mental/CompanyStats";
-import StressChart from "@/components/mental/StressChart";
-import Questionnaire from "@/components/mental/Questionnaire";
-import MentalExercises from "@/components/mental/MentalExercises";
+struct MentalWellnessView: View {
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                // MARK: - Header
+                ZStack {
+                    LinearGradient(
+                        colors: [Color.green.opacity(0.8), Color.green.opacity(0.4), Color.orange.opacity(0.4)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .opacity(0.9)
+                    
+                    VStack(alignment: .leading, spacing: 15) {
+                        HStack(spacing: 12) {
+                            Button(action: {
+                                // Action to dismiss or go back
+                            }) {
+                                Image(systemName: "arrow.left")
+                                    .foregroundColor(.white)
+                                    .frame(width: 36, height: 36)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
+                            }
+                            
+                            HStack {
+                                Image(systemName: "brain.head.profile")
+                                    .foregroundColor(.white)
+                                VStack(alignment: .leading) {
+                                    Text("Bienestar Mental")
+                                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("Fase 1 — Identificación")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.white.opacity(0.8))
+                                }
+                            }
+                        }
+                        .padding(.top, 60)
+                        .padding(.horizontal)
+                    }
+                    .padding(.bottom, 25)
+                }
+                .clipShape(RoundedCorner(radius: 30, corners: [.bottomLeft, .bottomRight]))
+                .edgesIgnoringSafeArea(.top)
 
-export default function MentalWellness() {
-  return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-b-3xl">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-emerald-300 to-orange-300 opacity-90" />
-        <div className="relative px-5 pt-12 pb-6">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
-              aria-label="Volver al inicio"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </Link>
-            <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-white" aria-hidden="true" />
-              <div>
-                <h1 className="text-xl font-heading font-bold text-white">Bienestar Mental</h1>
-                <p className="text-xs font-body text-white/80">Fase 1 — Identificación</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                // MARK: - Components
+                VStack(spacing: 10) {
+                    // Note: These views were created in previous steps
+                    
+                    // 1. Company Stats (Placeholder for the component)
+                    CompanyStatsView()
+                    
+                    // 2. Stress Chart (Placeholder for the component)
+                    StressChartView()
+                    
+                    // 3. Questionnaire
+                    QuestionnaireView()
+                    
+                    // 4. Mental Exercises
+                    MentalExercisesView()
+                    
+                    // MARK: - Progress Notice
+                    VStack {
+                        Text("🌱 Identifica tus emociones ahora para cuidarte de manera autónoma después. Tu progreso activará la siguiente fase y cambiará el color del tema.")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .padding(16)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.orange.opacity(0.05), Color.yellow.opacity(0.05), Color.green.opacity(0.05)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.orange.opacity(0.1), lineWidth: 1)
+                            )
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .padding(.bottom, 40)
+                }
+            }
+        }
+        .background(Color(.systemBackground))
+        .edgesIgnoringSafeArea(.top)
+    }
+}
 
-      <CompanyStats />
-      <StressChart />
-      <Questionnaire />
-      <MentalExercises />
+// MARK: - Local Placeholders for parent components
+// Replace these with your actual implementations if they exist as separate files
 
-      {/* Progress notice */}
-      <div className="px-5 mt-6 mb-8">
-        <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-emerald-50 rounded-2xl border border-amber-100/60 p-4 text-center">
-          <p className="text-xs font-body text-muted-foreground leading-relaxed">
-            🌱 Identifica tus emociones ahora para cuidarte de manera autónoma después. Tu progreso activará la siguiente fase y cambiará el color del tema.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+struct CompanyStatsView: View {
+    var body: some View {
+        Text("Estadísticas de Empresa")
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding()
+    }
+}
+
+struct StressChartView: View {
+    var body: some View {
+        Text("Gráfica de Estrés")
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding()
+    }
+}
+
+// MARK: - Preview
+struct MentalWellnessView_Previews: PreviewProvider {
+    static var previews: some View {
+        MentalWellnessView()
+    }
 }
