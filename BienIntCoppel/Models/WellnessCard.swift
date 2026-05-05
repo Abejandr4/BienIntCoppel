@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WellnessCard: Identifiable {
+struct WellnessCardModel: Identifiable {
     let id = UUID()
     let title: String
     let description: String
@@ -15,4 +15,5 @@ struct WellnessCard: Identifiable {
     let startColor: Color
     let endColor: Color
     let iconColor: Color
+    let destination: AnyView?
 }

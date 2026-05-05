@@ -1,16 +1,5 @@
 import SwiftUI
 
-// MARK: - 1. Model
-struct WellnessCardModel: Identifiable {
-    let id = UUID()
-    let title: String
-    let description: String
-    let iconName: String
-    let startColor: Color
-    let endColor: Color
-    let iconColor: Color
-    let destination: AnyView? // Allows any View to be passed
-}
 struct MainView: View {
     // Sample Data using your new Model structure
     let categories = [
