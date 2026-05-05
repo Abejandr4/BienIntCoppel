@@ -127,3 +127,6 @@ extension Color {
     }
 }
 
+#Preview {
+    PhysicalWellnessView()
+}
