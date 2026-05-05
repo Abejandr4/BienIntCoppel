@@ -1,35 +1,44 @@
 import SwiftUI
 
 struct MainView: View {
-    // Sample Data using your new Model structure
+    // Como ya tienes WellnessCardModel en "Models/WellnessCard.swift", lo usamos directamente aquí
     let categories = [
         WellnessCardModel(
-                    title: "Bienestar Físico",
-                    description: "Activa tu cuerpo con rutinas personalizadas",
-                    iconName: "heart.pulse.fill",
-                    startColor: Color("FFF9F2"), endColor: Color("FFF1E0"), iconColor: .orange,
-                    destination: AnyView(PhysicalWellnessView()) // Pass view here
-                ),
-                WellnessCardModel(
-                    title: "Bienestar Mental",
-                    description: "Gestiona tu estrés y cultiva tu equilibrio",
-                    iconName: "brain.head.profile",
-                    startColor: Color("F2FAF5"), endColor: Color("E0F2E9"), iconColor: .green,
-                    destination: AnyView(MentalWellnessView()) // Pass view here
-                ),
-                WellnessCardModel(
-                    title: "Bienestar Financiero",
-                    description: "Mejora tus finanzas y planifica tu futuro",
-                    iconName: "dollarsign.circle.fill",
-                    startColor: Color("FFFCF2"), endColor: Color("FFF9E0"), iconColor: .yellow,
-                    destination: nil
-                ),
-                WellnessCardModel(
-                    title: "Bienestar Social",
-                    description: "Conecta con tu comunidad y fortalece lazos",
-                    iconName: "person.2.fill",
-                    startColor: Color("F2F7FF"), endColor: Color("E0E9FF"), iconColor: .blue,
-                                 destination: nil)
+            title: "Bienestar Físico",
+            description: "Activa tu cuerpo con rutinas personalizadas",
+            iconName: "waveform.path.ecg",
+            startColor: Color(red: 1.0, green: 0.976, blue: 0.949), // Equivale a FFF9F2
+            endColor: Color(red: 1.0, green: 0.945, blue: 0.878),   // Equivale a FFF1E0
+            iconColor: .orange,
+            destination: AnyView(PhysicalWellnessView()) // Llama a tu PhysicalWellnessView existente
+        ),
+        WellnessCardModel(
+            title: "Bienestar Mental",
+            description: "Gestiona tu estrés y cultiva tu equilibrio",
+            iconName: "brain.head.profile",
+            startColor: Color(red: 0.949, green: 0.98, blue: 0.96), // Equivale a F2FAF5
+            endColor: Color(red: 0.878, green: 0.949, blue: 0.913), // Equivale a E0F2E9
+            iconColor: .green,
+            destination: AnyView(MentalWellnessView()) // Llama a tu MentalWellnessView existente
+        ),
+        WellnessCardModel(
+            title: "Bienestar Financiero",
+            description: "Mejora tus finanzas y planifica tu futuro",
+            iconName: "dollarsign.circle.fill",
+            startColor: Color(red: 1.0, green: 0.988, blue: 0.949), // Equivale a FFFCF2
+            endColor: Color(red: 1.0, green: 0.976, blue: 0.878),   // Equivale a FFF9E0
+            iconColor: .yellow,
+            destination: nil
+        ),
+        WellnessCardModel(
+            title: "Bienestar Social",
+            description: "Conecta con tu comunidad y fortalece lazos",
+            iconName: "person.2.fill",
+            startColor: Color(red: 0.949, green: 0.968, blue: 1.0), // Equivale a F2F7FF
+            endColor: Color(red: 0.878, green: 0.913, blue: 1.0),   // Equivale a E0E9FF
+            iconColor: .blue,
+            destination: nil
+        )
     ]
 
     var body: some View {
@@ -39,9 +48,10 @@ struct MainView: View {
                     HeaderView()
                     
                     VStack(alignment: .leading, spacing: 20) {
-                        Text("Bienestar Integral")
+                        Text("Tu Bienestar Integral")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                             .padding(.horizontal)
+                            .padding(.top, 40)
 
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                             ForEach(categories) { item in
@@ -56,8 +66,6 @@ struct MainView: View {
                             }
                         }
                         .padding(.horizontal)
-                        
-                        // ... rest of your UI
                     }
                 }
             }
@@ -66,12 +74,13 @@ struct MainView: View {
     }
 }
 
-// MARK: - 3. Header View
+// MARK: - Componentes de Vista Complementarios
+
 struct HeaderView: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             LinearGradient(
-                colors: [Color.orange.opacity(0.6), Color.green.opacity(0.4)],
+                colors: [Color.orange.opacity(0.7), Color.green.opacity(0.5)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -107,7 +116,6 @@ struct HeaderView: View {
     }
 }
 
-// MARK: - 4. Wellness Card View
 struct WellnessCardView: View {
     let data: WellnessCardModel
     
@@ -117,7 +125,7 @@ struct WellnessCardView: View {
                 .font(.title2)
                 .foregroundColor(data.iconColor)
                 .padding(10)
-                .background(Circle().fill(data.iconColor.opacity(0.1)))
+                .background(Circle().fill(data.iconColor.opacity(0.15)))
             
             Text(data.title)
                 .font(.system(size: 16, weight: .bold))
@@ -140,46 +148,6 @@ struct WellnessCardView: View {
     }
 }
 
-// MARK: - 5. AI Chat Card
-struct AIChatPreviewCard: View {
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .top, spacing: 12) {
-                Circle()
-                    .fill(LinearGradient(colors: [.orange, .green], startPoint: .top, endPoint: .bottom))
-                    .frame(width: 35, height: 35)
-                    .overlay(Image(systemName: "robot").foregroundColor(.white).font(.caption))
-                
-                Text("¡Hola! 👋 Soy tu acompañante de bienestar. ¿En qué puedo ayudarte hoy?")
-                    .font(.system(size: 15))
-                    .padding()
-                    .background(Color.secondary.opacity(0.1))
-                    // FIXED: Replaced UIKit corners with Pure SwiftUI UnevenRoundedRectangle
-                    .clipShape(UnevenRoundedRectangle(topLeadingRadius: 2, bottomLeadingRadius: 15, bottomTrailingRadius: 15, topTrailingRadius: 15))
-            }
-            .padding()
-            
-            Divider()
-            
-            HStack {
-                Text("Escribe tu pregunta...")
-                    .foregroundColor(.secondary)
-                    .font(.subheadline)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Capsule().fill(Color.secondary.opacity(0.05)))
-                
-                Image(systemName: "paperplane.fill")
-                    .padding(10)
-                    .background(Color.orange.opacity(0.2))
-                    .clipShape(Circle())
-                    .foregroundColor(.orange)
-            }
-            .padding()
-        }
-        .background(Color.primary.opacity(0.0).background(Material.thin)) // Pure SwiftUI background
-        .cornerRadius(25)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-    }
+#Preview {
+    MainView()
 }
