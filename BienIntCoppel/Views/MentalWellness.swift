@@ -1,4 +1,6 @@
 import SwiftUI
+import UIKit
+
 
 struct MentalWellnessView: View {
     var body: some View {
@@ -91,6 +93,21 @@ struct MentalWellnessView: View {
         }
         .background(Color(.systemBackground))
         .edgesIgnoringSafeArea(.top)
+    }
+}
+
+// MARK: - RoundedCorner Shape
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }
 
