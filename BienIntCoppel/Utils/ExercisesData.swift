@@ -28,7 +28,7 @@ struct ExercisesData {
         MentalExercise(
             title: "Técnica 4-7-8",
             benefit: "Sedación del sistema nervioso y mejora del enfoque.",
-            icon: "lungs.fill",
+            icon: "lungs",
             colors: [Color(red: 0.92, green: 0.96, blue: 1.0), Color.white],
             iconColor: .blue,
             duration: "2 min",
@@ -66,7 +66,7 @@ struct ExercisesData {
         MentalExercise(
             title: "Grounding 5-4-3-2-1",
             benefit: "Interrupción de ataques de pánico o ansiedad aguda.",
-            icon: "hand.point.up.left.fill",
+            icon: "hand.point.up.left",
             colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
             iconColor: .green,
             duration: "3 min",
@@ -102,7 +102,7 @@ struct ExercisesData {
         MentalExercise(
             title: "Observación de Objeto Neutral",
             benefit: "Recuperación de la atención ejecutiva.",
-            icon: "eye.fill",
+            icon: "eye",
             colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
             iconColor: .green,
             duration: "2 min",
@@ -122,7 +122,7 @@ struct ExercisesData {
         MentalExercise(
             title: "Tapping (EFT)",
             benefit: "Desensibilización ante disparadores emocionales.",
-            icon: "hand.tap.fill",
+            icon: "hand.tap",
             colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color.white],
             iconColor: .purple,
             duration: "5 min",
@@ -149,7 +149,7 @@ struct ExercisesData {
         MentalExercise(
             title: "Pendulación de Sensaciones",
             benefit: "Ampliación de la ventana de tolerancia emocional.",
-            icon: "metronome.fill",
+            icon: "metronome",
             colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color.white],
             iconColor: .purple,
             duration: "5 min",
@@ -169,7 +169,7 @@ struct ExercisesData {
         MentalExercise(
             title: "El Lenguaje Mágico del Yo",
             benefit: "Mejora de la comunicación asertiva.",
-            icon: "quote.bubble.fill",
+            icon: "quote.bubble",
             colors: [Color(red: 1.0, green: 0.95, blue: 0.90), Color.white],
             iconColor: .orange,
             duration: "5 min",
@@ -178,7 +178,7 @@ struct ExercisesData {
         MentalExercise(
             title: "Diario de Gratitud",
             benefit: "Reentrenamiento del sesgo de negatividad.",
-            icon: "heart.text.square.fill",
+            icon: "heart.text.square",
             colors: [Color(red: 1.0, green: 0.95, blue: 0.90), Color.white],
             iconColor: .orange,
             duration: "3 min",
