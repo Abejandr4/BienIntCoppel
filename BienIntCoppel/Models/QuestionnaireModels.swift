@@ -10,8 +10,11 @@ class QuestionnaireStore: ObservableObject {
     @Published var typeEngagement: [QuestionType: Int] = [
         .openText: 0,
         .multipleChoiceText: 0,
-        .multipleChoiceEmoji: 0
+        .multipleChoiceEmoji: 0,
+        .emojiOnly: 0
     ]
+    
+    var onEntrySaved: (([QuestionnaireEntry]) -> Void)?
     
     private let entriesKey   = "burnout_entries_v3"
     private let engagementKey = "burnout_type_engagement"
@@ -24,6 +27,8 @@ class QuestionnaireStore: ObservableObject {
         entries.append(entry)
         updateEngagement(from: entry)
         persist()
+        onEntrySaved?(entries)
+        
     }
     
     private func updateEngagement(from entry: QuestionnaireEntry) {
