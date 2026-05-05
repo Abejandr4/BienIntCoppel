@@ -58,6 +58,12 @@ struct MainView: View {
                         HeaderView()
                         
                         VStack(alignment: .leading, spacing: 16) {
+                            
+                            // NUEVA VISTA: Mini vista animada encima de los botones
+                            AnimatedParticleCard()
+                                .padding(.horizontal)
+                                .padding(.bottom, 5)
+                            
                             Text("Tu Bienestar Integral")
                                 .font(.custom("Poppins-Bold", size: 22))
                                 .foregroundColor(textColorDark)
@@ -100,6 +106,65 @@ struct MainView: View {
     }
 }
 
+// MARK: - Mini Vista Animada (Partículas)
+struct AnimatedParticleCard: View {
+    @State private var isAnimating = false
+    let particleCount = 15 // Cantidad de círculos flotantes
+
+    var body: some View {
+        ZStack {
+            // Fondo de la tarjeta (un gradiente suave)
+            LinearGradient(
+                colors: [Color(red: 0.88, green: 0.93, blue: 1.0), Color(red: 0.95, green: 0.88, blue: 0.98)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            // Partículas animadas
+            GeometryReader { geometry in
+                ForEach(0..<particleCount, id: \.self) { _ in
+                    Circle()
+                        .fill(Color.white.opacity(Double.random(in: 0.2...0.6)))
+                        .frame(width: CGFloat.random(in: 20...70))
+                        // Posición inicial y final aleatoria dentro de la tarjeta
+                        .position(
+                            x: isAnimating ? CGFloat.random(in: 0...geometry.size.width) : CGFloat.random(in: 0...geometry.size.width),
+                            y: isAnimating ? CGFloat.random(in: 0...geometry.size.height) : CGFloat.random(in: 0...geometry.size.height)
+                        )
+                        // Animación lenta, fluida e infinita
+                        .animation(
+                            Animation.easeInOut(duration: Double.random(in: 6...12))
+                                .repeatForever(autoreverses: true)
+                                .delay(Double.random(in: 0...2)),
+                            value: isAnimating
+                        )
+                }
+            }
+            .clipped() // Para que los círculos no se salgan de la tarjeta
+            
+            // Placeholder para tu futura animación
+            VStack {
+                Text("Espacio reservado para tu animación")
+                    .font(.custom("Poppins-Medium", size: 14))
+                    .foregroundColor(Color.black.opacity(0.4))
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                            .foregroundColor(Color.black.opacity(0.2))
+                    )
+            }
+        }
+        .frame(height: 200) // Altura de la mini vista
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+        .onAppear {
+            // Disparamos la animación en cuanto aparece la vista
+            isAnimating = true
+        }
+    }
+}
+
 // MARK: - Tarjeta de Bienestar
 struct WellnessCardView: View {
     let data: WellnessCardModel
@@ -107,14 +172,14 @@ struct WellnessCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             
-            // EL CAMBIO PRINCIPAL ESTÁ AQUÍ
+            // Círculo blanco sólido para máximo contraste
             Image(systemName: data.iconName)
                 .font(.system(size: 20, weight: .semibold)) // Ícono más grueso (.semibold)
                 .foregroundColor(data.iconColor)
                 .frame(width: 44, height: 44) // Tamaño fijo para que el círculo sea perfecto
                 .background(
                     Circle()
-                        .fill(Color.white) // Círculo blanco sólido para máximo contraste
+                        .fill(Color.white)
                         .shadow(color: data.iconColor.opacity(0.3), radius: 5, x: 0, y: 3) // Su propia sombra
                 )
             
@@ -236,6 +301,7 @@ struct HeaderView: View {
         }
     }
 }
+
 #Preview {
     MainView()
 }
