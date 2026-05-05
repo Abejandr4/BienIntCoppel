@@ -15,6 +15,13 @@ struct FactCardView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Header con Icon
             HStack {
+                Image(ficha.image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 80, height: 60)
+                    .padding(8)
+                    .background(Color.white.opacity(0.2))
+                
                 Text(ficha.boldText)
                     .font(.system(.title3, design: .rounded))
                     .bold()
@@ -22,19 +29,15 @@ struct FactCardView: View {
                 
                 Spacer()
                 
-                Image(systemName: "lightbulb.fill") // Replace with Image(ficha.image)
-                    .font(.title)
-                    .foregroundStyle(.yellow)
+               
             }
             
-            // Main Fact Text
             Text(ficha.normalText)
                 .font(.system(.body, design: .rounded))
                 .fontWeight(.medium)
                 .foregroundColor(.white)
                 .lineSpacing(4)
             
-            // Decorative Graphic Element (3 out of 4)
             HStack(spacing: 8) {
                 ForEach(0..<4) { index in
                     Circle()
