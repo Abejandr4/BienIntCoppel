@@ -202,14 +202,17 @@ class QuestionnaireViewModel: ObservableObject {
     
     // MARK: - Apple Intelligence
     
+    
+    //aqui se checa si está disponible Apple Intelligence
+    
     private func setupAI() async {
-        do {
-            let probe = LanguageModelSession()
-            _ = try await probe.respond(to: "ping")
+        let model = SystemLanguageModel.default
+        switch model.availability {
+        case .available:
             session = LanguageModelSession(tools: [GenerateQuestionsTool()])
             aiAvailable = true
             usingAI = true
-        } catch {
+        case .unavailable(let reason):
             aiAvailable = false
             usingAI = false
         }
