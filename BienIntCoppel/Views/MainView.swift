@@ -51,7 +51,6 @@ struct MainView: View {
                         Text("Tu Bienestar Integral")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                             .padding(.horizontal)
-                            .padding(.top, 40)
 
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                             ForEach(categories) { item in
@@ -153,10 +152,6 @@ struct WellnessCardView: View {
         )
         .cornerRadius(20)
     }
-}
-
-#Preview {
-    MainView()
 }
 
 #Preview {

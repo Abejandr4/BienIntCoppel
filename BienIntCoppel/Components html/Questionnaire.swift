@@ -50,7 +50,7 @@ struct QuestionnaireView: View {
                 .padding(.bottom, 40)
             }
             .background(Color(white: 0.97).ignoresSafeArea())
-            .navigationTitle("Cuestionario")
+            
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $showContactsView) {
                 ContactosView()
