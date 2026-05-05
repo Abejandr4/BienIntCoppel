@@ -9,7 +9,7 @@ struct MentalWellnessView: View {
                 // MARK: - Header
                 ZStack {
                     LinearGradient(
-                        colors: [Color.green.opacity(0.8), Color.green.opacity(0.4), Color.orange.opacity(0.4)],
+                        colors: [Color.green.opacity(0.9), Color.green.opacity(0.5), Color.orange.opacity(0.7)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -17,35 +17,31 @@ struct MentalWellnessView: View {
                     
                     VStack(alignment: .leading, spacing: 15) {
                         HStack(spacing: 12) {
-                            Button(action: {
-                                // Action to dismiss or go back
-                            }) {
-                                Image(systemName: "arrow.left")
-                                    .foregroundColor(.white)
-                                    .frame(width: 36, height: 36)
-                                    .background(Color.white.opacity(0.2))
-                                    .clipShape(Circle())
-                            }
-                            
-                            HStack {
-                                Image(systemName: "brain.head.profile")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 30))
-                                VStack(alignment: .leading) {
-                                    Text("Bienestar Mental")
-                                        .font(.title)
-                                                                    .fontWeight(.bold)
-                                                                    .foregroundColor(.white)
-                                    Text("Fase 1 — Identificación")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.white.opacity(0.8))
+                                // Envolvemos el contenido en otro HStack y añadimos un Spacer
+                                HStack(spacing: 12) {
+                                    Image(systemName: "brain.head.profile")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 30))
+                                        .padding(.horizontal, 20)
+                                    
+                                    VStack(alignment: .leading) {
+                                        Text("Bienestar Mental")
+                                            .font(.title)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal,-20)
+                                    }
                                 }
-                            }
+                                
+                            Spacer()
+                            
                         }
                         .padding(.top, 80)
-                        .padding(.horizontal)
+                        
+
                     }
                     .padding(.bottom, 25)
+                    
                 }
                 .clipShape(RoundedCorner(radius: 30, corners: [.bottomLeft, .bottomRight]))
                 .edgesIgnoringSafeArea(.top)
@@ -63,18 +59,21 @@ struct MentalWellnessView: View {
                     // 3. Questionnaire
                     QuestionnaireView()
                     
-                    // 4. Mental Exercises
+                    // 4. Recommended Exercises
+                    RecommendedExerciseView(scoresCuestionario: 50)
+                    
+                    // 5. Mental Exercises
                     MentalExercisesView()
                     
                     // MARK: - Progress Notice
                     VStack {
-                        Text("🌱 Identifica tus emociones ahora para cuidarte de manera autónoma después. Tu progreso activará la siguiente fase y cambiará el color del tema.")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(4)
-                            .padding(16)
-                            .background(
+                        Text("\(Image(systemName: "leaf.fill")) Identifica tus emociones ahora para cuidarte de manera autónoma después. Tu progreso activará la siguiente fase y cambiará el color del tema.")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(16)
+                                .background(
                                 LinearGradient(
                                     colors: [Color.orange.opacity(0.05), Color.yellow.opacity(0.05), Color.green.opacity(0.05)],
                                     startPoint: .leading,

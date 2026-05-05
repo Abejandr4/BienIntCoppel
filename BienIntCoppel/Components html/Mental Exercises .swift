@@ -99,6 +99,7 @@ struct ExerciseRow: View {
             // Play Button
             Button(action: {
                 // Start exercise action
+                UserInteractionTracker.shared.registrarClic(categoria: exercise.title)
             }) {
                 Image(systemName: "play.fill")
                     .font(.system(size: 12))
