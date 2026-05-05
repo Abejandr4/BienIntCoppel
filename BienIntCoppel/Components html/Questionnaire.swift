@@ -167,7 +167,9 @@ struct QuestionnaireView: View {
     }
     
     private var submitButton: some View {
-        Button {
+        let canSubmit = vm.selectedOptionIndex >= 0 || !vm.openAnswer.isEmpty
+
+        return Button {
             Task { await vm.submitAndGenerate() }
         } label: {
             Group {
@@ -189,9 +191,9 @@ struct QuestionnaireView: View {
                 )
             )
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .opacity(vm.selectedOption.isEmpty || vm.openAnswer.isEmpty ? 0.5 : 1)
+            .opacity(canSubmit ? 1 : 0.5)
         }
-        .disabled(vm.selectedOption.isEmpty || vm.openAnswer.isEmpty)
+        .disabled(!canSubmit)
     }
     
     private var loadingCard: some View {

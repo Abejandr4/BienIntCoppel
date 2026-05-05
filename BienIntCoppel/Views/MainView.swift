@@ -57,7 +57,12 @@ struct MainView: View {
                         }
                         .padding(.horizontal)
                         
-                        // ... rest of your UI
+                        // banner
+                        Banner(
+                            title: "Toma un rápido cuestionario.",
+                            description: "Así, puedes llevar una vida más sana a largo plazo.",
+                            intensity: 20
+                        )
                     }
                 }
             }
@@ -182,4 +187,8 @@ struct AIChatPreviewCard: View {
         .cornerRadius(25)
         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
     }
+}
+
+#Preview {
+    MainView()
 }
