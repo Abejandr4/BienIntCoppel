@@ -71,38 +71,6 @@ struct PreguntasView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 25)
-
-                // MARK: - Still have questions card
-                VStack(spacing: 8) {
-                    Image(systemName: "robot")
-                        .font(.system(size: 32))
-                        .foregroundColor(.blue)
-                        .padding(.bottom, 4)
-                    
-                    Text("¿Aún tienes dudas?")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                    
-                    Text("Pregunta directamente a tu Acompañante AI desde Home")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(LinearGradient(
-                            colors: [Color.blue.opacity(0.05), Color.green.opacity(0.05)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.blue.opacity(0.1), lineWidth: 1)
-                )
-                .padding(.horizontal)
-                .padding(.vertical, 30)
             }
         }
         .background(Color(white: 0.98))
