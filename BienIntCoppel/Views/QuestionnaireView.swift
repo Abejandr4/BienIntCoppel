@@ -295,23 +295,21 @@ struct QuestionnaireView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 15) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.7))
-                        .frame(width: 40, height: 40)
                     Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 18))
                         .foregroundColor(Color(red: 0.75, green: 0.35, blue: 0.0))
                 }
                 .accessibilityHidden(true)
                 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack() {
                     Text("Cuestionario de Seguimiento")
                         .fontWeight(.bold)
                         .foregroundColor(Color(white: 0.12))
+                        .padding(.trailing, 85)
                     Text("Responde con honestidad para un mejor resultado. La empresa no puede acceder a tus respuestas.")
+                        .fontWeight(.light)
                         .foregroundColor(Color(white: 0.3))
                         .lineSpacing(2)
-                        .padding(.trailing, 20)
                     
                 }
                 Spacer()

@@ -105,7 +105,10 @@ struct MainView: View {
 
 // MARK: - Contenedor Principal de la Tarjeta Animada
 struct AnimatedParticleCard: View {
-    let animatedImages = ["Coppelia5", "Coppelia4", "Coppelia2", "Coppelia1", "Coppelia3", "Coppelia1", "Coppelia2", "Coppelia4"]
+    @EnvironmentObject var appState: AppState
+    @State private var showQuestionnaire = false
+    
+    let animatedImages = ["Coppelia1", "Coppelia2", "Coppelia3", "Coppelia4", "Coppelia5"]
     
     // Mensajes mixtos: tips de bienestar + normalización de salud mental
     let thoughts = [
@@ -148,19 +151,19 @@ struct AnimatedParticleCard: View {
             .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
             
             // Botón debajo de la nube → navega al cuestionario
-            NavigationLink(destination: QuestionnaireView()) {
+            Button(action: { showQuestionnaire = true }) {
                 HStack(spacing: 8) {
                     Image(systemName: "heart.text.square")
                         .font(.system(size: 24, weight: .semibold))
-                    
-                    Text("¿Cómo te sientes hoy?")
-                        .font(.custom("Poppins-SemiBold", size: 16))
-                    
-                    Spacer()
-                    
-                    Image(systemName: "arrow.right")
+                        Text("¿Cómo te sientes hoy?")
+                            .font(.custom("Poppins-SemiBold", size: 16))
+                        
+                        Spacer()
+                        
+                        Image(systemName: "arrow.right")
+                    }
                         .font(.system(size: 14, weight: .bold))
-                }
+                
                 .foregroundColor(.white)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 14)
@@ -180,6 +183,11 @@ struct AnimatedParticleCard: View {
             }
             .buttonStyle(PlainButtonStyle())
         }
+        .sheet(isPresented: $showQuestionnaire) {
+            QuestionnaireView()
+                .environmentObject(appState)
+        }
+        
     }
 }
 
@@ -580,4 +588,5 @@ struct HeaderView: View {
 
 #Preview {
     MainView()
+        .environmentObject(AppState())
 }
