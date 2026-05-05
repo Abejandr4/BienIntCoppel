@@ -92,24 +92,28 @@ struct Banner: View {
 // Wrapper to handle the Navigation and the "Big X"
 // Wrapper to handle the Navigation and the "Big X"
 struct QuestionnaireContainer: View {
-    @Binding var isPresented: Bool // Binding ensures the state is shared with the Banner
+    @Binding var isPresented: Bool
     
     var body: some View {
         NavigationStack {
-            QuestionnaireView() // This is where the AI-generated questions will appear
+            QuestionnaireView()
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        // The "Big X" button to opt out and dismiss the view
-                        Button(action: { isPresented = false }) { // Directly toggles the sheet visibility
+                        Button(action: { isPresented = false }) {
                             Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 24))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundColor(.secondary)
+                                // Making the icon "notorious" with a heavy weight and red color
+                                .font(.system(size: 28, weight: .bold))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(.white, .red) // White 'X', Red background
                         }
-                        .accessibilityLabel("Cerrar cuestionario") // Accessibility for users
+                        .accessibilityLabel("Cerrar cuestionario")
                     }
                 }
         }
+        // This creates the "smaller than screen" look (iOS 16+)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .cornerRadius(25) // Rounds the corners of the sheet
     }
 }
 
