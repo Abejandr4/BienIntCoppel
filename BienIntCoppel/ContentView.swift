@@ -28,7 +28,7 @@ struct ContentView: View {
                     .tag(2)
                 
                 // MARK: - Ajustes Tab
-                AjustessView()
+                AjustesView()
                     .tabItem {
                         Label("Ajustes", systemImage: "gearshape.fill")
                     }
@@ -36,30 +36,6 @@ struct ContentView: View {
             }
             .accentColor(.orange) // Matches the highlight color in your image
         }
-    }
-}
-
-// MARK: - Placeholder Views
-// These are placeholders so the code compiles. You can replace them with your actual files.
-
-struct ComunidadView: View {
-    var body: some View {
-        Text("Comunidad View")
-            .font(.title)
-    }
-}
-
-struct PreguntasView: View {
-    var body: some View {
-        Text("Preguntas View")
-            .font(.title)
-    }
-}
-
-struct SettingsView: View {
-    var body: some View {
-        Text("Ajustes View")
-            .font(.title)
     }
 }
 
