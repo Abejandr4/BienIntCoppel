@@ -67,13 +67,13 @@ struct MentalWellnessView: View {
                     
                     // MARK: - Progress Notice
                     VStack {
-                        Text("🌱 Identifica tus emociones ahora para cuidarte de manera autónoma después. Tu progreso activará la siguiente fase y cambiará el color del tema.")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(4)
-                            .padding(16)
-                            .background(
+                        Text("\(Image(systemName: "leaf.fill")) Identifica tus emociones ahora para cuidarte de manera autónoma después. Tu progreso activará la siguiente fase y cambiará el color del tema.")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(16)
+                                .background(
                                 LinearGradient(
                                     colors: [Color.orange.opacity(0.05), Color.yellow.opacity(0.05), Color.green.opacity(0.05)],
                                     startPoint: .leading,
