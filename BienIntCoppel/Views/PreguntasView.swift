@@ -36,7 +36,7 @@ struct PreguntasView: View {
                     .frame(height: 140)
                     
                     HStack(spacing: 12) {
-                        Image(systemName: "questionmark.circle.fill")
+                        Image(systemName: "questionmark.circle")
                             .font(.system(size: 20))
                             .foregroundColor(.white)
                         
@@ -106,6 +106,7 @@ struct PreguntasView: View {
             }
         }
         .background(Color(white: 0.98))
+        .edgesIgnoringSafeArea(.top) 
     }
 }
 

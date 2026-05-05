@@ -4,7 +4,7 @@ struct Banner: View {
     let title: String
     let description: String?
     let intensity: Int
-    let shouldPulse: Bool // New control variable
+    let shouldPulse: Bool 
     
     @State private var showQuestionnaire = false
     @State private var isPulsing = false

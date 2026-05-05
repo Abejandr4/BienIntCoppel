@@ -8,7 +8,6 @@ enum AlertVariant {
     var backgroundColor: Color {
         switch self {
         case .default:
-            // Standard SwiftUI way to get the primary background
             return Color.primary.opacity(0.0)
         case .destructive:
             return Color.red.opacity(0.1)
@@ -25,7 +24,6 @@ enum AlertVariant {
     var borderColor: Color {
         switch self {
         case .default:
-            // Pure SwiftUI alternative to 'separator'
             return Color.secondary.opacity(0.2)
         case .destructive:
             return .red.opacity(0.5)
@@ -33,7 +31,7 @@ enum AlertVariant {
     }
 }
 
-// 2. Componente Principal (Alert)
+// Componente Principal (Alert)
 struct AlertView<Content: View>: View {
     let variant: AlertVariant
     let icon: Image?
@@ -73,7 +71,7 @@ struct AlertView<Content: View>: View {
     }
 }
 
-// 3. Sub-componentes (Equivalentes a AlertTitle y AlertDescription)
+// Sub-componentes (Equivalentes a AlertTitle y AlertDescription)
 struct AlertTitle: View {
     let text: String
     var body: some View {

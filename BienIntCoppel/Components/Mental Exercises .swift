@@ -145,12 +145,16 @@ struct ExerciseRow: View {
                 UserInteractionTracker.shared.registrarClic(categoria: exercise.title)
                 mostrarDetalle = true
             }) {
-                Image(systemName: "play.fill")
+                Image(systemName: "play")
                     .font(.system(size: 12))
-                    .foregroundColor(.primary)
+                    .foregroundColor(exercise.iconColor)
                     .frame(width: 36, height: 36)
                     .background(Color.white.opacity(0.8))
                     .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(exercise.iconColor.opacity(0.4), lineWidth: 1.5)
+                    )
                     .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
             }
         }
