@@ -7,6 +7,7 @@ struct Banner: View {
     let intensity: Int
     
     @State private var showQuestionnaire = false
+    @State private var isPulsing = false
     
     // Intensity calculation logic
     private var opacityLevel: Double {
@@ -55,8 +56,26 @@ struct Banner: View {
                         )
                 )
         )
+        
+        .scaleEffect(isPulsing ? 1.02 : 1.0)
+                
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(Color.purple.opacity(opacityLevel * 0.2), lineWidth: 1)
+                )
+        
         .padding(.horizontal)
         // Presentation logic
+        
+        .onAppear {
+                    withAnimation(
+                        .easeInOut(duration: 0.6) // 2 seconds for a soft "breath"
+                        .repeatForever(autoreverses: true)
+                    ) {
+                        isPulsing = true
+                    }
+                }
+        
         .sheet(isPresented: $showQuestionnaire) {
             QuestionnaireContainer(isPresented: $showQuestionnaire)
         }

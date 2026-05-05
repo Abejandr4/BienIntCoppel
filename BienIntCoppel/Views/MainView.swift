@@ -71,7 +71,7 @@ struct MainView: View {
                         Banner(
                             title: "Toma un rápido cuestionario.",
                             description: "Así, puedes llevar una vida más sana a largo plazo.",
-                            intensity: 20
+                            intensity: 25
                         )
                     }
                 }

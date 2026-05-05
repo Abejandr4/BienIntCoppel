@@ -7,6 +7,7 @@ struct QuestionnaireView: View {
     @StateObject private var store = QuestionnaireStore()
     @StateObject private var vm: QuestionnaireViewModel
     @State private var showContactsView = false
+    @State private var isHeaderVisible = true
     
     init() {
         let s = QuestionnaireStore()
@@ -19,7 +20,10 @@ struct QuestionnaireView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     
-                    headerCard
+                    if isHeaderVisible {
+                            headerCard
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
                     
                     if vm.isLoading {
                         loadingCard
@@ -40,6 +44,7 @@ struct QuestionnaireView: View {
                             .padding(.horizontal)
                     }
                 }
+                .animation(.spring(), value: isHeaderVisible)
                 .padding(.horizontal)
                 .padding(.top, 16)
                 .padding(.bottom, 40)
@@ -58,6 +63,7 @@ struct QuestionnaireView: View {
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 15) {
+                // Icon
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color.white.opacity(0.7))
@@ -67,13 +73,17 @@ struct QuestionnaireView: View {
                         .foregroundColor(.orange)
                 }
                 
+                // Text Content
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Cuestionario de Seguimiento")
                         .font(.system(size: 14, weight: .bold, design: .rounded))
+                    
                     Text("Responde con honestidad. Tus datos son privados y solo se usan para personalizar tus preguntas.")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .lineSpacing(2)
+                        .padding(.trailing, 20) // Leave room for the 'X'
+                    
                     Link(destination: URL(string: "https://pmc.ncbi.nlm.nih.gov/articles/PMC7359652/")!) {
                         HStack(spacing: 4) {
                             Text("Ver estudio de referencia")
@@ -84,10 +94,19 @@ struct QuestionnaireView: View {
                     }
                     .padding(.top, 2)
                 }
+                
+                Spacer()
+                
+                // Dismiss Button
+                Button(action: { isHeaderVisible = false }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.secondary.opacity(0.5))
+                }
             }
         }
         .padding(20)
-        .background(cardBackground)
+        .background(cardBackground) // Assumes you have this defined
         .clipShape(RoundedRectangle(cornerRadius: 20))
     }
     
