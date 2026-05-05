@@ -124,15 +124,7 @@ struct PhysicalWellnessView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack(spacing: 12) {
-                Button(action: {
-                    // Acción para volver atrás
-                }) {
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Color.white.opacity(0.2))
-                        .clipShape(Circle())
-                }
+                
                 
                 HStack {
                     Image(systemName: "waveform.path.ecg")

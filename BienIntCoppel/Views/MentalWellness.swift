@@ -17,15 +17,8 @@ struct MentalWellnessView: View {
                     
                     VStack(alignment: .leading, spacing: 15) {
                         HStack(spacing: 12) {
-                            Button(action: {
-                                // Action to dismiss or go back
-                            }) {
-                                Image(systemName: "arrow.left")
-                                    .foregroundColor(.white)
-                                    .frame(width: 36, height: 36)
-                                    .background(Color.white.opacity(0.2))
-                                    .clipShape(Circle())
-                            }
+                            
+                            
                             
                             HStack {
                                 Image(systemName: "brain.head.profile")
@@ -34,18 +27,20 @@ struct MentalWellnessView: View {
                                 VStack(alignment: .leading) {
                                     Text("Bienestar Mental")
                                         .font(.title)
+                                    
                                                                     .fontWeight(.bold)
                                                                     .foregroundColor(.white)
-                                    Text("Fase 1 — Identificación")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.white.opacity(0.8))
                                 }
+                                
                             }
+                            .padding(.horizontal, 20)
                         }
                         .padding(.top, 80)
-                        .padding(.horizontal)
+                        
+
                     }
                     .padding(.bottom, 25)
+                    
                 }
                 .clipShape(RoundedCorner(radius: 30, corners: [.bottomLeft, .bottomRight]))
                 .edgesIgnoringSafeArea(.top)
