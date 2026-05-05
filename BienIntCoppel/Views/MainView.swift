@@ -9,53 +9,71 @@ struct WellnessCardModel: Identifiable {
     let startColor: Color
     let endColor: Color
     let iconColor: Color
+    let destination: AnyView? // Allows any View to be passed
 }
-
-// MARK: - 2. Main View
 struct MainView: View {
-    // Sample Data using your new Model structure
     let categories = [
-        WellnessCardModel(title: "Bienestar Físico", description: "Activa tu cuerpo con rutinas personalizadas", iconName: "heart.pulse.fill", startColor: Color(hex: "FFF9F2"), endColor: Color(hex: "FFF1E0"), iconColor: .orange),
-        WellnessCardModel(title: "Bienestar Mental", description: "Gestiona tu estrés y cultiva tu equilibrio", iconName: "brain.head.profile", startColor: Color(hex: "F2FAF5"), endColor: Color(hex: "E0F2E9"), iconColor: .green),
-        WellnessCardModel(title: "Bienestar Financiero", description: "Mejora tus finanzas y planifica tu futuro", iconName: "dollarsign.circle.fill", startColor: Color(hex: "FFFCF2"), endColor: Color(hex: "FFF9E0"), iconColor: .yellow),
-        WellnessCardModel(title: "Bienestar Social", description: "Conecta con tu comunidad y fortalece lazos", iconName: "person.2.fill", startColor: Color(hex: "F2F7FF"), endColor: Color(hex: "E0E9FF"), iconColor: .blue)
+        WellnessCardModel(
+            title: "Bienestar Físico",
+            description: "Activa tu cuerpo con rutinas personalizadas",
+            iconName: "heart.pulse.fill",
+            startColor: Color(hex: "FFF9F2"), endColor: Color(hex: "FFF1E0"), iconColor: .orange,
+            destination: AnyView(PhysicalWellnessView()) // Pass view here
+        ),
+        WellnessCardModel(
+            title: "Bienestar Mental",
+            description: "Gestiona tu estrés y cultiva tu equilibrio",
+            iconName: "brain.head.profile",
+            startColor: Color(hex: "F2FAF5"), endColor: Color(hex: "E0F2E9"), iconColor: .green,
+            destination: AnyView(MentalWellnessView()) // Pass view here
+        ),
+        WellnessCardModel(
+            title: "Bienestar Financiero",
+            description: "Mejora tus finanzas y planifica tu futuro",
+            iconName: "dollarsign.circle.fill",
+            startColor: Color(hex: "FFFCF2"), endColor: Color(hex: "FFF9E0"), iconColor: .yellow,
+            destination: nil
+        ),
+        WellnessCardModel(
+            title: "Bienestar Social",
+            description: "Conecta con tu comunidad y fortalece lazos",
+            iconName: "person.2.fill",
+            startColor: Color(hex: "F2F7FF"), endColor: Color(hex: "E0E9FF"), iconColor: .blue,
+            destination: nil
+            )
     ]
-    
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 25) {
-                
-                HeaderView()
-                
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Bienestar Integral")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .padding(.horizontal)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 25) {
+                    HeaderView()
                     
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        ForEach(categories) { item in
-                            WellnessCardView(data: item)
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Bienestar Integral")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .padding(.horizontal)
+
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                            ForEach(categories) { item in
+                                if let dest = item.destination {
+                                    NavigationLink(destination: dest) {
+                                        WellnessCardView(data: item)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                } else {
+                                    WellnessCardView(data: item)
+                                }
+                            }
                         }
-                    }
-                    .padding(.horizontal)
-                    
-                    HStack {
-                        Image(systemName: "sparkles")
-                            .foregroundColor(.orange)
-                        Text("Tu Acompañante AI")
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 10)
-                    
-                    AIChatPreviewCard()
                         .padding(.horizontal)
+                        
+                        // ... rest of your UI
+                    }
                 }
             }
-            .padding(.bottom, 30)
+            .edgesIgnoringSafeArea(.top)
         }
-        .edgesIgnoringSafeArea(.top)
-        .background(Color.primary.opacity(0.02).ignoresSafeArea())
     }
 }
 
