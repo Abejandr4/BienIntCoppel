@@ -105,7 +105,7 @@ struct MainView: View {
 
 // MARK: - Contenedor Principal de la Tarjeta Animada
 struct AnimatedParticleCard: View {
-    let animatedImages = ["Coppelia1", "Coppelia2", "Coppelia3", "Coppelia4", "Coppelia5"]
+    let animatedImages = ["Coppelia5", "Coppelia4", "Coppelia2", "Coppelia1", "Coppelia3", "Coppelia1", "Coppelia2", "Coppelia4"]
     
     // Mensajes mixtos: tips de bienestar + normalización de salud mental
     let thoughts = [
@@ -135,17 +135,15 @@ struct AnimatedParticleCard: View {
                         images: animatedImages,
                         currentIndex: $currentIndex
                     )
-                    .frame(width: 130, height: 130)
-                    .padding(.leading, 12)
+                    .frame(width: 180, height: 180)
                     
                     ThoughtBubbleView(text: thoughts[currentIndex % thoughts.count])
-                        .padding(.trailing, 14)
-                        .padding(.leading, 2)
-                    
-                    Spacer(minLength: 0)
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal, 16)
+                
             }
-            .frame(height: 160)
+            .frame(height: 240)
             .cornerRadius(20)
             .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
             
@@ -276,7 +274,7 @@ struct ThoughtBubbleView: View {
                 await MainActor.run {
                     displayedText.append(character)
                 }
-                let delay: UInt64 = (character == "," || character == ".") ? 180_000_000 : 45_000_000
+                let delay: UInt64 = (character == "," || character == ".") ? 250_000_000 : 80_000_000
                 try? await Task.sleep(nanoseconds: delay)
             }
         }
@@ -288,7 +286,7 @@ struct ThoughtBubbleView: View {
         }
         
         Task {
-            try? await Task.sleep(nanoseconds: 280_000_000)
+            try? await Task.sleep(nanoseconds: 300_000_000)
             await MainActor.run {
                 startTyping()
             }
@@ -412,7 +410,7 @@ struct ParticleBackgroundView: View {
                             y: isAnimating ? CGFloat.random(in: 0...geometry.size.height) : CGFloat.random(in: 0...geometry.size.height)
                         )
                         .animation(
-                            Animation.easeInOut(duration: Double.random(in: 6...12))
+                            Animation.easeInOut(duration: Double.random(in: 15...25))
                                 .repeatForever(autoreverses: true)
                                 .delay(Double.random(in: 0...2)),
                             value: isAnimating
@@ -431,7 +429,7 @@ struct SmoothImageSequenceView: View {
     let images: [String]
     @Binding var currentIndex: Int
     
-    let timer = Timer.publish(every: 5.0, on: .main, in: .common).autoconnect()
+    let timer = Timer.publish(every: 2.0, on: .main, in: .common).autoconnect()
     
     var body: some View {
         ZStack {
@@ -440,7 +438,7 @@ struct SmoothImageSequenceView: View {
                     .resizable()
                     .scaledToFit()
                     .opacity(currentIndex == index ? 1.0 : 0.0)
-                    .animation(.easeInOut(duration: 1.5), value: currentIndex)
+                    .animation(.easeInOut(duration: 1), value: currentIndex)
             }
         }
         .onReceive(timer) { _ in
@@ -573,11 +571,6 @@ struct HeaderView: View {
                 
                 Spacer()
                 
-                Image(systemName: "bell")
-                    .font(.system(size: 18, weight: .semibold))
-                    .padding(12)
-                    .background(Circle().fill(Color.white.opacity(0.3)))
-                    .foregroundColor(.white)
             }
             .padding(.horizontal, 25)
             .padding(.bottom, 25)
