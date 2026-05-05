@@ -412,6 +412,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BienIntCoppel/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Bienestar Integral Coppel necesita acceso a tu cámara para subir fotos a tus publicaciones.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Bienestar Integral Coppel necesita acceso a tu galería para subir fotos a tus publicaciones.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -458,6 +460,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BienIntCoppel/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Bienestar Integral Coppel necesita acceso a tu cámara para subir fotos a tus publicaciones.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Bienestar Integral Coppel necesita acceso a tu galería para subir fotos a tus publicaciones.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

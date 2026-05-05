@@ -518,7 +518,7 @@ struct NewPostSheet: View {
                     } else {
                         Button(action: { showSourceDialog = true }) {
                             VStack(spacing: 10) {
-                                Image(systemName: "camera.fill")
+                                Image(systemName: "camera")
                                     .font(.system(size: 28))
                                     .foregroundColor(Color(red: 0.98, green: 0.64, blue: 0.40))
                                 Text("Agregar foto")
