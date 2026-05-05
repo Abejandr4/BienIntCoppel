@@ -18,7 +18,6 @@ struct ComunidadView: View {
                     )
                     .opacity(0.9)
                     .frame(height: 140)
-                    .clipShape(RoundedCorner(radius: 30, corners: [.bottomLeft, .bottomRight]))
                     
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 4) {
@@ -66,7 +65,6 @@ struct ComunidadView: View {
             }
         }
         .background(Color(white: 0.98))
-        .navigationBarHidden(true) // We use our custom header instead
     }
 }
 
