@@ -1,54 +1,88 @@
-//
-//  Alert.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 19 on 04/05/26.
-//
+import SwiftUI
 
-import * as React from "react"
-import { cva } from "class-variance-authority";
+// 1. Definimos las variantes (Equivalente a alertVariants)
+enum AlertVariant {
+    case `default`
+    case destructive
+    
+    var backgroundColor: Color {
+        switch self {
+        case .default: return Color(.systemBackground)
+        case .destructive: return Color.red.opacity(0.1)
+        }
+    }
+    
+    var foregroundColor: Color {
+        switch self {
+        case .default: return .primary
+        case .destructive: return .red
+        }
+    }
+    
+    var borderColor: Color {
+        switch self {
+        case .default: return Color(.separator)
+        case .destructive: return .red.opacity(0.5)
+        }
+    }
+}
 
-import { cn } from "@/lib/utils"
+// 2. Componente Principal (Alert)
+struct AlertView<Content: View>: View {
+    let variant: AlertVariant
+    let icon: Image?
+    let content: Content
+    
+    init(
+        variant: AlertVariant = .default,
+        icon: Image? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.variant = variant
+        self.icon = icon
+        self.content = content()
+    }
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            if let icon = icon {
+                icon
+                    .font(.system(size: 16))
+                    .foregroundColor(variant.foregroundColor)
+                    .padding(.top, 2)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                content
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(variant.backgroundColor)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(variant.borderColor, lineWidth: 1)
+        )
+    }
+}
 
-const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
-  {
-    variants: {
-      variant: {
-        default: "bg-background text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+// 3. Sub-componentes (Equivalentes a AlertTitle y AlertDescription)
+struct AlertTitle: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 14, weight: .medium))
+            .lineSpacing(1)
+    }
+}
 
-const Alert = React.forwardRef(({ className, variant, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="alert"
-    className={cn(alertVariants({ variant }), className)}
-    {...props} />
-))
-Alert.displayName = "Alert"
-
-const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
-    {...props} />
-))
-AlertTitle.displayName = "AlertTitle"
-
-const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props} />
-))
-AlertDescription.displayName = "AlertDescription"
-
-export { Alert, AlertTitle, AlertDescription }
+struct AlertDescription: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 14))
+            .foregroundColor(.secondary)
+            .lineSpacing(4)
+    }
+}
