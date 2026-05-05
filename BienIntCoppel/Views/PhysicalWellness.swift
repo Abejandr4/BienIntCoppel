@@ -27,11 +27,13 @@ struct ChallengeItem: Identifiable {
     let id = UUID()
     let title: String
     let desc: String
-    let iconName: String // Cambiado de emoji a iconName
+    let iconName: String
 }
 
 // MARK: - Main View
 struct PhysicalWellnessView: View {
+    // Variable de entorno para regresar a la pantalla anterior
+    @Environment(\.dismiss) private var dismiss
     
     // MARK: - Computed Properties
     private var nutritionPlanAttributedText: AttributedString {
@@ -84,7 +86,6 @@ struct PhysicalWellnessView: View {
         QuickAccessItem(title: "Llamar a Coppel Contigo", desc: "Orientación telefónica especializada, ocupas ambulancia o algún apoyo económico.", iconName: "phone.fill", color: .green, bgColor: .green.opacity(0.15))
     ]
     
-    // Cambiamos los emojis por SF Symbols acordes a cada reto
     private let challenges = [
         ChallengeItem(title: "Entrenamientos 2026", desc: "Todos los entrenamientos 2026", iconName: "figure.run"),
         ChallengeItem(title: "Actívate 10,000 pasos", desc: "Realizar 10,000 pasos al día durante un mes.", iconName: "figure.walk"),
@@ -95,42 +96,39 @@ struct PhysicalWellnessView: View {
     
     // MARK: - Body
     var body: some View {
-        ZStack {
-            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
-            
-            ScrollView {
-                VStack(spacing: 0) {
-                    headerSection
-                    
-                    VStack(spacing: 24) {
-                        activityTodaySection
-                        trainingsSection
-                        nutritionPlanSection
-                        quickAccessSection
-                        challengesSection
-                        echaleKilosBanner
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 40)
+        ScrollView {
+            VStack(spacing: 0) {
+                headerSection
+                
+                VStack(spacing: 24) {
+                    activityTodaySection
+                    trainingsSection
+                    nutritionPlanSection
+                    quickAccessSection
+                    challengesSection
+                    echaleKilosBanner
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 40)
             }
-            .edgesIgnoringSafeArea(.top)
         }
+        .background(Color(UIColor.systemBackground))
+        .ignoresSafeArea(edges: .top)
+        .toolbar(.hidden, for: .navigationBar) // Oculta la barra de navegación predeterminada
     }
     
     // MARK: - Sections
-    
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack(spacing: 12) {
-                Button(action: {
-                    // Acción para volver atrás
-                }) {
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Color.white.opacity(0.2))
+                // Botón de regresar personalizado
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.black.opacity(0.7))
+                        .frame(width: 40, height: 40)
+                        .background(Color.white.opacity(0.6))
                         .clipShape(Circle())
                 }
                 
@@ -150,20 +148,22 @@ struct PhysicalWellnessView: View {
                 }
                 Spacer()
             }
-            .padding(.top, 80)
+            .padding(.top, 100) // Ajuste para que no se oculte tras el notch
             .padding(.horizontal, 20)
         }
         .padding(.bottom, 24)
+        .frame(maxWidth: .infinity)
         .background(
+            LinearGradient(
+                colors: [.orange, .yellow, .green],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .opacity(0.9)
+            .ignoresSafeArea(edges: .top)
+        )
+        .clipShape(
             UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24)
-                .fill(
-                    LinearGradient(
-                        colors: [.orange, .yellow, .green],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .opacity(0.9)
         )
     }
     
@@ -204,22 +204,23 @@ struct PhysicalWellnessView: View {
     
     private var trainingsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
+            HStack(spacing: 6) {
                 Text("Tus Entrenamientos")
                     .font(.headline)
                     .fontWeight(.bold)
                 Text("(13)")
                     .font(.headline)
+                    .fontWeight(.bold)
                     .foregroundColor(.blue)
             }
             
             HStack {
                 ForEach(trainingStats) { stat in
-                    VStack(spacing: 4) {
+                    VStack(spacing: 6) {
                         Text(stat.value)
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 15, weight: .bold))
                         Text(stat.label)
-                            .font(.system(size: 10))
+                            .font(.caption)
                             .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity)
@@ -320,7 +321,6 @@ struct PhysicalWellnessView: View {
                                 .fill(Color.orange.opacity(0.1))
                                 .frame(width: 48, height: 48)
                             
-                            // Usamos Image con el SF Symbol en lugar de Text con el emoji
                             Image(systemName: item.iconName)
                                 .foregroundColor(.orange)
                                 .font(.system(size: 24))
@@ -351,65 +351,59 @@ struct PhysicalWellnessView: View {
     }
     
     private var echaleKilosBanner: some View {
-            GeometryReader { geometry in
+        GeometryReader { geometry in
+            let coppelBlue = Color(red: 0 / 255, green: 93 / 255, blue: 170 / 255)
+            let coppelLightBlue = Color(red: 0 / 255, green: 125 / 255, blue: 205 / 255)
+            
+            ZStack {
+                LinearGradient(
+                    colors: [coppelLightBlue, coppelBlue],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
                 
-                // Definimos los colores institucionales de Coppel
-                let coppelBlue = Color(red: 0 / 255, green: 93 / 255, blue: 170 / 255)
-                let coppelLightBlue = Color(red: 0 / 255, green: 125 / 255, blue: 205 / 255)
-                
-                ZStack {
-                    // Fondo con el degradado del azul Coppel
-                    LinearGradient(
-                        colors: [coppelLightBlue, coppelBlue],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("¡ÉCHALE LOS KILOS – COPPEL")
+                        .font(.system(size: 10, weight: .medium, design: .default))
+                        .tracking(1.5)
+                        .foregroundColor(.white.opacity(0.8))
                     
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("ÉCHALE LOS KILOS ••• COPPEL")
-                            .font(.system(size: 10, weight: .medium, design: .default))
-                            .tracking(1.5)
-                            .foregroundColor(.white.opacity(0.8))
-                        
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("¡El poder")
-                            Text("está en ti!")
-                                .foregroundColor(.yellow)
-                        }
-                        .font(.title)
-                        .fontWeight(.black)
-                        .foregroundColor(.white)
-                        
-                        Text("Inscríbete hoy al programa **Échale los Kilos** y da el primer paso.")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.9))
-                            .frame(maxWidth: 200, alignment: .leading)
-                        
-                        Button(action: {}) {
-                            Text("¿Te atreves?")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                // Usamos el azul fuerte para el botón para que contraste
-                                .background(coppelBlue.opacity(0.8))
-                                .overlay(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1))
-                                .clipShape(Capsule())
-                        }
-                        .padding(.top, 4)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("¡El poder")
+                        Text("está en ti!")
+                            .foregroundColor(.yellow)
                     }
-                    .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.title)
+                    .fontWeight(.black)
+                    .foregroundColor(.white)
+                    
+                    Text("Inscríbete hoy al programa **Échale los Kilos** y da el primer paso.")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.9))
+                        .frame(maxWidth: 200, alignment: .leading)
+                    
+                    Button(action: {}) {
+                        Text("¿Te atreves?")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(coppelBlue.opacity(0.8))
+                            .overlay(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1))
+                            .clipShape(Capsule())
+                    }
+                    .padding(.top, 4)
                 }
-                .cornerRadius(16)
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(height: 176)
+            .cornerRadius(16)
         }
+        .frame(height: 176)
+    }
 }
 
-// MARK: - Preview
 #Preview {
     PhysicalWellnessView()
 }
