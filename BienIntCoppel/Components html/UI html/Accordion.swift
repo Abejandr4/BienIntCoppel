@@ -1,48 +1,58 @@
-//
-//  accordion.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 19 on 04/05/26.
-//
+import SwiftUI
 
-import * as React from "react"
-import * as AccordionPrimitive from "@radix-ui/react-accordion"
-import { ChevronDown } from "lucide-react"
+struct AccordionItemView: View {
+    let title: String
+    let content: String
+    @State private var isExpanded: Bool = false
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            DisclosureGroup(isExpanded: $isExpanded) {
+                // AccordionContent
+                Text(content)
+                    .font(.footnote)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 16)
+                    .foregroundColor(.secondary)
+            } label: {
+                // AccordionTrigger
+                Text(title)
+                    .font(.smSystemFont(size: 14, weight: .medium))
+                    .foregroundColor(.primary)
+                    .padding(.vertical, 16)
+            }
+            .accentColor(.secondary) // Color del ChevronDown
+        }
+        .border(width: 1, edges: [.bottom], color: Color(.separator))
+    }
+}
 
-import { cn } from "@/lib/utils"
+// Helper para el borde inferior (simula el "border-b" de Tailwind)
+extension View {
+    func border(width: CGFloat, edges: [Edge], color: Color) -> some View {
+        overlay(
+            EdgeBorder(width: width, edges: edges).foregroundColor(color)
+        )
+    }
+}
 
-const Accordion = AccordionPrimitive.Root
-
-const AccordionItem = React.forwardRef(({ className, ...props }, ref) => (
-  <AccordionPrimitive.Item ref={ref} className={cn("border-b", className)} {...props} />
-))
-AccordionItem.displayName = "AccordionItem"
-
-const AccordionTrigger = React.forwardRef(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
-    <AccordionPrimitive.Trigger
-      ref={ref}
-      className={cn(
-        "flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left [&[data-state=open]>svg]:rotate-180",
-        className
-      )}
-      {...props}>
-      {children}
-      <ChevronDown
-        className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
-    </AccordionPrimitive.Trigger>
-  </AccordionPrimitive.Header>
-))
-AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
-
-const AccordionContent = React.forwardRef(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Content
-    ref={ref}
-    className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
-    {...props}>
-    <div className={cn("pb-4 pt-0", className)}>{children}</div>
-  </AccordionPrimitive.Content>
-))
-AccordionContent.displayName = AccordionPrimitive.Content.displayName
-
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+struct EdgeBorder: Shape {
+    var width: CGFloat
+    var edges: [Edge]
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        for edge in edges {
+            var x: CGFloat { rect.minX }
+            var y: CGFloat { rect.minY }
+            var w: CGFloat { rect.width }
+            var h: CGFloat { rect.height }
+            switch edge {
+            case .top: path.addRect(CGRect(x: x, y: y, width: w, height: width))
+            case .bottom: path.addRect(CGRect(x: x, y: y + h - width, width: w, height: width))
+            case .leading: path.addRect(CGRect(x: x, y: y, width: width, height: h))
+            case .trailing: path.addRect(CGRect(x: x + w - width, y: y, width: width, height: h))
+            }
+        }
+        return path
+    }
+}
