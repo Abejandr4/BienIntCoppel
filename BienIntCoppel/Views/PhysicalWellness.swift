@@ -65,9 +65,9 @@ struct PhysicalWellnessView: View {
     
     // MARK: - Data
     private let activityStats = [
-        ActivityStat(label: "Tiempo", value: "0 Min", iconName: "clock"),
+        ActivityStat(label: "Tiempo", value: "36 Min", iconName: "clock"),
         ActivityStat(label: "Distancia", value: "0.00 Km", iconName: "mappin.and.ellipse"),
-        ActivityStat(label: "Pasos", value: "1,053", iconName: "shoeprints.fill")
+        ActivityStat(label: "Pasos", value: "2,053", iconName: "shoeprints.fill")
     ]
     
     private let trainingStats = [
