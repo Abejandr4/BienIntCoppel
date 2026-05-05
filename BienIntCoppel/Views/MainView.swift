@@ -14,10 +14,33 @@ struct WellnessCardModel: Identifiable {
 struct MainView: View {
     // Sample Data using your new Model structure
     let categories = [
-        WellnessCardModel(title: "Bienestar Físico", description: "Activa tu cuerpo con rutinas personalizadas", iconName: "heart.pulse.fill", startColor: Color("FFF9F2"), endColor: Color("FFF1E0"), iconColor: .orange),
-        WellnessCardModel(title: "Bienestar Mental", description: "Gestiona tu estrés y cultiva tu equilibrio", iconName: "brain.head.profile", startColor: Color("F2FAF5"), endColor: Color("E0F2E9"), iconColor: .green),
-        WellnessCardModel(title: "Bienestar Financiero", description: "Mejora tus finanzas y planifica tu futuro", iconName: "dollarsign.circle.fill", startColor: Color("FFFCF2"), endColor: Color("FFF9E0"), iconColor: .yellow),
-        WellnessCardModel(title: "Bienestar Social", description: "Conecta con tu comunidad y fortalece lazos", iconName: "person.2.fill", startColor: Color("F2F7FF"), endColor: Color("E0E9FF"), iconColor: .blue)
+        WellnessCardModel(
+                    title: "Bienestar Físico",
+                    description: "Activa tu cuerpo con rutinas personalizadas",
+                    iconName: "heart.pulse.fill",
+                    startColor: Color("FFF9F2"), endColor: Color("FFF1E0"), iconColor: .orange,
+                    destination: AnyView(PhysicalWellnessView()) // Pass view here
+                ),
+                WellnessCardModel(
+                    title: "Bienestar Mental",
+                    description: "Gestiona tu estrés y cultiva tu equilibrio",
+                    iconName: "brain.head.profile",
+                    startColor: Color("F2FAF5"), endColor: Color("E0F2E9"), iconColor: .green,
+                    destination: AnyView(MentalWellnessView()) // Pass view here
+                ),
+                WellnessCardModel(
+                    title: "Bienestar Financiero",
+                    description: "Mejora tus finanzas y planifica tu futuro",
+                    iconName: "dollarsign.circle.fill",
+                    startColor: Color("FFFCF2"), endColor: Color("FFF9E0"), iconColor: .yellow,
+                    destination: nil
+                ),
+                WellnessCardModel(
+                    title: "Bienestar Social",
+                    description: "Conecta con tu comunidad y fortalece lazos",
+                    iconName: "person.2.fill",
+                    startColor: Color("F2F7FF"), endColor: Color("E0E9FF"), iconColor: .blue,
+                                 destination: nil)
     ]
 
     var body: some View {
