@@ -1,15 +1,11 @@
-//
-//  BienIntCoppelApp.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 11 on 04/05/26.
-//
-
 import SwiftUI
 import SwiftData
 
 @main
 struct BienIntCoppelApp: App {
+    
+    @StateObject private var appState = AppState()
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -26,6 +22,7 @@ struct BienIntCoppelApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appState)
         }
         .modelContainer(sharedModelContainer)
     }

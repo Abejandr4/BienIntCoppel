@@ -3,10 +3,14 @@ import FoundationModels
 
 struct QuestionnaireView: View {
     
+    
     @StateObject private var store = QuestionnaireStore()
     @StateObject private var vm: QuestionnaireViewModel
+    @EnvironmentObject var appState: AppState
     @State private var showContactsView = false
     @State private var isHeaderVisible = true
+    @State private var activeRecommendations: [WellnessRecommendation] = []
+    @State private var showRecommendationBanner = false
     
     init() {
         let s = QuestionnaireStore()
@@ -33,10 +37,6 @@ struct QuestionnaireView: View {
                         submitButton
                     }
                     
-                    if store.riskLevel.shouldShowAlert {
-                        riskAlertBanner
-                    }
-                    
                     if let error = vm.errorMessage {
                         Text(error)
                             .font(.caption)
@@ -50,41 +50,75 @@ struct QuestionnaireView: View {
                 .padding(.bottom, 40)
             }
             .background(Color(white: 0.97).ignoresSafeArea())
-            
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $showContactsView) {
                 ContactosView()
             }
         }
+        .onAppear {
+            store.onEntrySaved = { entries in
+                appState.update(from: entries)
+            }
+        }
     }
     
-    // MARK: - Question card router
+    // MARK: - Selection handler
+    
+    private func handleSelection(question: BurnoutQuestion, index: Int, text: String) {
+        vm.selectedOptions[question.id] = (index: index, text: text)
+        
+        let weight = question.riskWeights?[safe: index] ?? 0
+        let recs = WellnessRecommendations.recommendations(
+            for: question.dimension,
+            riskWeight: weight
+        )
+        
+        if !recs.isEmpty {
+            activeRecommendations = recs
+            withAnimation(.spring(response: 0.4)) {
+                showRecommendationBanner = true
+            }
+        } else {
+            withAnimation(.spring(response: 0.3)) {
+                showRecommendationBanner = false
+            }
+        }
+    }
+    
+    // MARK: - Question card
     
     @ViewBuilder
     private func questionCard(for question: BurnoutQuestion) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            
             dimensionBadge(question.dimension)
-            
             Text(question.text)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundColor(.primary)
                 .fixedSize(horizontal: false, vertical: true)
-            
-            switch question.type {
-            case .openText:
-                openTextInput(for: question)
-            case .multipleChoiceText:
-                multipleChoiceList(for: question, emojiStyle: false)
-            case .multipleChoiceEmoji:
-                multipleChoiceList(for: question, emojiStyle: true)
-            case .emojiOnly:
-                emojiOnlyPicker(for: question)
+            inputView(for: question)
+            if showRecommendationBanner && !activeRecommendations.isEmpty {
+                recommendationBanner
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding(20)
         .background(cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+    
+    // Extracted switch so the compiler can type-check each branch independently
+    @ViewBuilder
+    private func inputView(for question: BurnoutQuestion) -> some View {
+        switch question.type {
+        case .openText:
+            openTextInput(for: question)
+        case .multipleChoiceText:
+            multipleChoiceList(for: question, emojiStyle: false)
+        case .multipleChoiceEmoji:
+            multipleChoiceList(for: question, emojiStyle: true)
+        case .emojiOnly:
+            emojiOnlyPicker(for: question)
+        }
     }
     
     // MARK: - Input types
@@ -122,9 +156,8 @@ struct QuestionnaireView: View {
         VStack(spacing: emojiStyle ? 8 : 10) {
             ForEach(Array((question.options ?? []).enumerated()), id: \.offset) { index, option in
                 let isSelected = vm.selectedOptions[question.id]?.index == index
-                
                 Button {
-                    vm.selectedOptions[question.id] = (index: index, text: option)
+                    handleSelection(question: question, index: index, text: option)
                 } label: {
                     HStack(spacing: emojiStyle ? 12 : 10) {
                         if emojiStyle {
@@ -167,9 +200,8 @@ struct QuestionnaireView: View {
         HStack(spacing: 8) {
             ForEach(Array((question.options ?? []).enumerated()), id: \.offset) { index, emoji in
                 let isSelected = vm.selectedOptions[question.id]?.index == index
-                
                 Button {
-                    vm.selectedOptions[question.id] = (index: index, text: emoji)
+                    handleSelection(question: question, index: index, text: emoji) // ← emoji, not option
                 } label: {
                     Text(emoji)
                         .font(.system(size: 32))
@@ -220,7 +252,36 @@ struct QuestionnaireView: View {
         }
     }
     
-    // MARK: - Static cards
+    // MARK: - Cards
+    
+    private var recommendationBanner: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "lightbulb.fill")
+                    .font(.system(size: 11))
+                    .foregroundColor(.orange)
+                Text("Un pequeño paso puede ayudar")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(.orange)
+            }
+            ForEach(activeRecommendations.prefix(2), id: \.text) { rec in
+                HStack(alignment: .top, spacing: 8) {
+                    Text(rec.icon).font(.system(size: 14))
+                    Text(rec.text)
+                        .font(.system(size: 12, design: .rounded))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.orange.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+        )
+    }
     
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -312,58 +373,6 @@ struct QuestionnaireView: View {
         .clipShape(RoundedRectangle(cornerRadius: 20))
     }
     
-    private var riskAlertBanner: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 10) {
-                Image(systemName: "heart.text.clipboard")
-                    .font(.system(size: 22))
-                    .foregroundColor(.pink)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Te recomendamos hablar con alguien")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                    Text(store.riskLevel.mensaje)
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            Divider().opacity(0.4)
-            Text("Un psicólogo puede ayudarte a procesar lo que estás viviendo. No tienes que cargarlo solo/a.")
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
-                .lineSpacing(3)
-            Button { showContactsView = true } label: {
-                HStack {
-                    Image(systemName: "person.crop.circle.badge.plus")
-                    Text("Ver contactos de apoyo")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(
-                    LinearGradient(
-                        colors: [Color.pink.opacity(0.8), Color.purple.opacity(0.6)],
-                        startPoint: .leading, endPoint: .trailing
-                    )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-        }
-        .padding(20)
-        .background(
-            LinearGradient(
-                colors: [Color.pink.opacity(0.06), Color.purple.opacity(0.04)],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.pink.opacity(0.2), lineWidth: 1)
-        )
-    }
-    
     private var cardBackground: some ShapeStyle {
         LinearGradient(
             colors: [Color.orange.opacity(0.04), Color.green.opacity(0.03)],
@@ -374,4 +383,5 @@ struct QuestionnaireView: View {
 
 #Preview {
     QuestionnaireView()
+        .environmentObject(AppState())
 }
