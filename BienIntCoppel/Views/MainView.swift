@@ -1,56 +1,44 @@
 import SwiftUI
 
+// MARK: - 1. Model
+struct WellnessCardModel: Identifiable {
+    let id = UUID()
+    let title: String
+    let description: String
+    let iconName: String
+    let startColor: Color
+    let endColor: Color
+    let iconColor: Color
+}
+
+// MARK: - 2. Main View
 struct MainView: View {
+    // Sample Data using your new Model structure
+    let categories = [
+        WellnessCardModel(title: "Bienestar Físico", description: "Activa tu cuerpo con rutinas personalizadas", iconName: "heart.pulse.fill", startColor: Color(hex: "FFF9F2"), endColor: Color(hex: "FFF1E0"), iconColor: .orange),
+        WellnessCardModel(title: "Bienestar Mental", description: "Gestiona tu estrés y cultiva tu equilibrio", iconName: "brain.head.profile", startColor: Color(hex: "F2FAF5"), endColor: Color(hex: "E0F2E9"), iconColor: .green),
+        WellnessCardModel(title: "Bienestar Financiero", description: "Mejora tus finanzas y planifica tu futuro", iconName: "dollarsign.circle.fill", startColor: Color(hex: "FFFCF2"), endColor: Color(hex: "FFF9E0"), iconColor: .yellow),
+        WellnessCardModel(title: "Bienestar Social", description: "Conecta con tu comunidad y fortalece lazos", iconName: "person.2.fill", startColor: Color(hex: "F2F7FF"), endColor: Color(hex: "E0E9FF"), iconColor: .blue)
+    ]
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 25) {
                 
-                // MARK: - Header
                 HeaderView()
                 
                 VStack(alignment: .leading, spacing: 20) {
-                    
-                    // MARK: - Wellness Section
                     Text("Bienestar Integral")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                         .padding(.horizontal)
                     
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        WellnessCard(
-                            title: "Bienestar Físico",
-                            subtitle: "Activa tu cuerpo con rutinas personalizadas",
-                            icon: "heart.pulse.fill",
-                            iconColor: .orange,
-                            bgColor: Color(red: 0.99, green: 0.96, blue: 0.92)
-                        )
-                        
-                        WellnessCard(
-                            title: "Bienestar Mental",
-                            subtitle: "Gestiona tu estrés y cultiva tu equilibrio",
-                            icon: "brain.head.profile",
-                            iconColor: .green,
-                            bgColor: Color(red: 0.92, green: 0.98, blue: 0.95)
-                        )
-                        
-                        WellnessCard(
-                            title: "Bienestar Financiero",
-                            subtitle: "Mejora tus finanzas y planifica tu futuro",
-                            icon: "dollarsign.circle.fill",
-                            iconColor: .yellow,
-                            bgColor: Color(red: 1.0, green: 0.98, blue: 0.9)
-                        )
-                        
-                        WellnessCard(
-                            title: "Bienestar Social",
-                            subtitle: "Conecta con tu comunidad y fortalece lazos",
-                            icon: "person.2.fill",
-                            iconColor: .blue,
-                            bgColor: Color(red: 0.92, green: 0.96, blue: 1.0)
-                        )
+                        ForEach(categories) { item in
+                            WellnessCardView(data: item)
+                        }
                     }
                     .padding(.horizontal)
                     
-                    // MARK: - AI Section
                     HStack {
                         Image(systemName: "sparkles")
                             .foregroundColor(.orange)
@@ -67,22 +55,21 @@ struct MainView: View {
             .padding(.bottom, 30)
         }
         .edgesIgnoringSafeArea(.top)
-        .background(Color(white: 0.98))
+        .background(Color.primary.opacity(0.02).ignoresSafeArea())
     }
 }
 
-// MARK: - Subviews
-
+// MARK: - 3. Header View
 struct HeaderView: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             LinearGradient(
-                gradient: Gradient(colors: [Color.orange.opacity(0.6), Color.green.opacity(0.4)]),
+                colors: [Color.orange.opacity(0.6), Color.green.opacity(0.4)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            .frame(height: 180)
-            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+            .frame(height: 200)
+            .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 30, bottomTrailingRadius: 30))
             
             HStack(alignment: .center) {
                 Circle()
@@ -113,26 +100,23 @@ struct HeaderView: View {
     }
 }
 
-struct WellnessCard: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    let iconColor: Color
-    let bgColor: Color
+// MARK: - 4. Wellness Card View
+struct WellnessCardView: View {
+    let data: WellnessCardModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: icon)
+            Image(systemName: data.iconName)
                 .font(.title2)
-                .foregroundColor(iconColor)
+                .foregroundColor(data.iconColor)
                 .padding(10)
-                .background(RoundedRectangle(cornerRadius: 12).fill(iconColor.opacity(0.1)))
+                .background(Circle().fill(data.iconColor.opacity(0.1)))
             
-            Text(title)
+            Text(data.title)
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.black.opacity(0.8))
+                .foregroundColor(.primary.opacity(0.8))
             
-            Text(subtitle)
+            Text(data.description)
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
                 .lineLimit(3)
@@ -142,15 +126,17 @@ struct WellnessCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity, minHeight: 180, alignment: .topLeading)
-        .background(bgColor)
+        .background(
+            LinearGradient(colors: [data.startColor, data.endColor], startPoint: .top, endPoint: .bottom)
+        )
         .cornerRadius(20)
     }
 }
 
+// MARK: - 5. AI Chat Card
 struct AIChatPreviewCard: View {
     var body: some View {
         VStack(spacing: 0) {
-            // Chat Bubble
             HStack(alignment: .top, spacing: 12) {
                 Circle()
                     .fill(LinearGradient(colors: [.orange, .green], startPoint: .top, endPoint: .bottom))
@@ -160,14 +146,14 @@ struct AIChatPreviewCard: View {
                 Text("¡Hola! 👋 Soy tu acompañante de bienestar. ¿En qué puedo ayudarte hoy?")
                     .font(.system(size: 15))
                     .padding()
-                    .background(Color(white: 0.95))
-                    .cornerRadius(15, corners: [.topRight, .bottomLeft, .bottomRight])
+                    .background(Color.secondary.opacity(0.1))
+                    // FIXED: Replaced UIKit corners with Pure SwiftUI UnevenRoundedRectangle
+                    .clipShape(UnevenRoundedRectangle(topLeadingRadius: 2, bottomLeadingRadius: 15, bottomTrailingRadius: 15, topTrailingRadius: 15))
             }
             .padding()
             
             Divider()
             
-            // Input Area
             HStack {
                 Text("Escribe tu pregunta...")
                     .foregroundColor(.secondary)
@@ -175,32 +161,18 @@ struct AIChatPreviewCard: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Capsule().fill(Color(white: 0.96)))
+                    .background(Capsule().fill(Color.secondary.opacity(0.05)))
                 
                 Image(systemName: "paperplane.fill")
                     .padding(10)
-                    .background(LinearGradient(colors: [.orange.opacity(0.5), .green.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .background(Color.orange.opacity(0.2))
                     .clipShape(Circle())
-                    .foregroundColor(.white)
+                    .foregroundColor(.orange)
             }
             .padding()
         }
-        .background(Color.white)
+        .background(Color.primary.opacity(0.0).background(Material.thin)) // Pure SwiftUI background
         .cornerRadius(25)
         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-    }
-}
-
-// Helper to round specific corners
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-
-struct MainView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainView()
     }
 }

@@ -34,7 +34,6 @@ struct PreguntasView: View {
                     )
                     .opacity(0.9)
                     .frame(height: 140)
-                    .clipShape(RoundedCorner(radius: 30, corners: [.bottomLeft, .bottomRight]))
                     
                     HStack(spacing: 12) {
                         Image(systemName: "questionmark.circle.fill")
@@ -107,7 +106,6 @@ struct PreguntasView: View {
             }
         }
         .background(Color(white: 0.98))
-        .navigationBarHidden(true)
     }
 }
 

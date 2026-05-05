@@ -27,7 +27,6 @@ struct AjustesView: View {
                         endPoint: .bottomTrailing
                     )
                     .opacity(0.9)
-                    .clipShape(RoundedCorner(radius: 30, corners: [.bottomLeft, .bottomRight]))
                     
                     VStack(spacing: 12) {
                         // Avatar
@@ -114,7 +113,7 @@ struct AjustesView: View {
             }
         }
         .background(Color(white: 0.98))
-        .navigationBarHidden(true)
+
     }
 }
 
