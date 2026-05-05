@@ -12,7 +12,6 @@ struct FichaInformativa : Decodable {
     var boldText: String
     var normalText: String
     var image: String
-    var graphs: [String]
 }
 
 
@@ -21,35 +20,30 @@ let fichas: [FichaInformativa] = [
         id: "H-A",
         boldText: "¿Sabías que...",
         normalText: "3 de cada 4 mexicanos sufre de estrés laboral agudo.",
-        image: "",
-        graphs: ["blueLight"],
+        image: ""
     ),
     FichaInformativa(
         id: "H-B",
         boldText: "Y recuerda",
         normalText: "cuídarte también es cuidar de los que más amas",
-        image: "",
-        graphs: ["blueLight"]
+        image: ""
     ),
     FichaInformativa(
         id: "H-C",
         boldText: "¡No importa el género!",
         normalText: "El estrés y la fátiga puede sucederle a cualquiera",
-        image: "",
-        graphs: ["blueLight"]
+        image: ""
     ),
     FichaInformativa(
         id: "H-D",
         boldText: "No estás solo",
         normalText: "busca acompañamiento con un psicólogo de un CEDIS si crees que es necesario",
-        image: "",
-        graphs: ["blueLight"]
+        image: ""
     ),
     FichaInformativa(
         id: "H-E",
         boldText: "Fátiga crónica",
         normalText: "sentirse extremadamente agotado todo el tiempo no es saludable, busca atención",
-        image: "",
-        graphs: ["blueLight"]
+        image: ""
     )
 ]

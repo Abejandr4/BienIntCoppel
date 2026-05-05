@@ -57,8 +57,8 @@ struct MentalWellnessView: View {
                 
                 // MARK: - Components
                 VStack(spacing: 10) {
-                    CompanyStatsView()
-                    StressChartView()
+                    RandomFactCard(fichas: fichas)
+                        .padding(15)
                     Banner(
                         title: "Toma un rápido cuestionario.",
                         description: "Así, puedes llevar una vida más sana a largo plazo.",
@@ -114,26 +114,7 @@ struct RoundedCorner: Shape {
     }
 }
 
-// MARK: - Local Placeholders for parent components
-struct CompanyStatsView: View {
-    var body: some View {
-        Text("Estadísticas de Empresa")
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity)
-            .padding()
-    }
-}
 
-struct StressChartView: View {
-    var body: some View {
-        Text("Gráfica de Estrés")
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity)
-            .padding()
-    }
-}
 
 struct MentalWellnessView_Previews: PreviewProvider {
     static var previews: some View {
