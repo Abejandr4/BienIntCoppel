@@ -9,10 +9,10 @@ struct FAQItem: Identifiable {
 struct PreguntasView: View {
     // FAQ Data from your React component
     private let faqItems = [
-        FAQItem(q: "¿Cómo funciona el acompañamiento AI?", a: "Nuestro asistente analiza tus patrones de estrés y te sugiere actividades personalizadas para mejorar tu bienestar."),
-        FAQItem(q: "¿Mis datos son privados?", a: "Sí, toda tu información es completamente confidencial y anónima. Solo tú puedes ver tus datos personales."),
-        FAQItem(q: "¿Cada cuánto debo responder el cuestionario?", a: "Recomendamos responder semanalmente para obtener predicciones más precisas de tus picos de estrés."),
-        FAQItem(q: "¿Puedo hablar con un profesional?", a: "Sí, desde la sección de Bienestar Mental puedes solicitar una sesión con un psicólogo certificado.")
+        FAQItem(q: "¿Cómo funciona el acompañamiento IA?", a: "Copelia analiza los patrones de estrés y recomienda acciones que te beneficiarían. Además, te recomienda actividades para bajar el estrés que te podrían gustar."),
+        FAQItem(q: "¿Lo que conteste en la app es anónimo?", a: "Sí, todas tus respuestas son confidenciales y si se borra la aplicación, con ella esos datos."),
+        FAQItem(q: "¿Cada cuánto debo responder el cuestionario?", a: "Recomendamos responder al menos una vez al día para obtener mejores recomendaciones."),
+        FAQItem(q: "¿Cómo puedo ir con un profesional?", a: "Preguntaq en tu CEDIS más cercano o buscálo en nuestro directorio. Las citas se pueden realizar en persona o por teléfono.")
     ]
     
     @State private var expandedId: UUID? = nil

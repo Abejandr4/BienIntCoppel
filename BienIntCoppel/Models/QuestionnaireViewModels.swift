@@ -67,32 +67,36 @@ class QuestionnaireViewModel: ObservableObject {
     // MARK: - Guardar y generar siguiente ronda
     
     func submitAndGenerate() async {
-        guard selectedOptionIndex >= 0,
-              !openAnswer.trimmingCharacters(in: .whitespaces).isEmpty
-        else { return }
+        // Solo requiere que al menos una respuesta esté presente
+        let hasMultipleChoice = selectedOptionIndex >= 0
+        let hasOpenAnswer = !openAnswer.trimmingCharacters(in: .whitespaces).isEmpty
         
-        let weight = currentRiskWeights[safe: selectedOptionIndex] ?? 0
-        
+        guard hasMultipleChoice || hasOpenAnswer else { return }
+
+        let weight = hasMultipleChoice
+            ? (currentRiskWeights[safe: selectedOptionIndex] ?? 0)
+            : 0  // peso neutro si no se respondió la opción múltiple
+
         let entry = QuestionnaireEntry(
             id: UUID(),
             date: Date(),
             multipleChoiceQuestion: multipleChoiceQuestion,
-            multipleChoiceAnswer: selectedOption,
+            multipleChoiceAnswer: hasMultipleChoice ? selectedOption : "",
             multipleChoiceRiskWeight: weight,
             openQuestion: openQuestion,
-            openAnswer: openAnswer
+            openAnswer: hasOpenAnswer ? openAnswer : ""
         )
         store.save(entry: entry)
         isSaved = true
-        
+
         isLoading = true
-        
+
         if aiAvailable {
             await generateWithAI()
         } else {
             await generateWithHeuristic()
         }
-        
+
         isLoading = false
     }
     
