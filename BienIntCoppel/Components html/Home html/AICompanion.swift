@@ -1,118 +1,204 @@
-//
-//  AICompanion.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 19 on 04/05/26.
-//
+import SwiftUI
 
-import { useState } from "react";
-import { Send, Bot, Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
+// 1. Data Model
+struct Message: Identifiable, Equatable {
+    let id = UUID()
+    let role: MessageRole
+    let content: String
+}
 
-const initialMessages = [
-  {
-    role: "assistant",
-    content: "¡Hola! 👋 Soy tu acompañante de bienestar. ¿En qué puedo ayudarte hoy?",
-  },
-];
+enum MessageRole {
+    case user
+    case assistant
+}
 
-export default function AICompanion() {
-  const [messages, setMessages] = useState(initialMessages);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-    const userMsg = { role: "user", content: input.trim() };
-    setMessages(prev => [...prev, userMsg]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const { base44 } = await import("@/api/base44Client");
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Eres un acompañante de bienestar para empleados de Coppel. Responde de forma empática, breve y útil en español. La pregunta del usuario es: ${userMsg.content}`,
-      });
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
-    } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Lo siento, hubo un error. Intenta de nuevo." }]);
-    } finally {
-      setIsLoading(false);
+struct AICompanionView: View {
+    @State private var messages: [Message] = [
+        Message(role: .assistant, content: "¡Hola! 👋 Soy tu acompañante de bienestar. ¿En qué puedo ayudarte hoy?")
+    ]
+    @State private var inputText: String = ""
+    @State private var isLoading: Bool = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .foregroundColor(.blue) // Assuming primary color
+                Text("Tu Acompañante AI")
+                    .font(.headline)
+                    .fontWeight(.bold)
+            }
+            .padding(.horizontal, 20)
+            
+            // Chat Container
+            VStack(spacing: 0) {
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(messages) { msg in
+                                MessageBubble(message: msg)
+                                    .id(msg.id)
+                            }
+                            
+                            if isLoading {
+                                LoadingBubble()
+                                    .id("loading")
+                            }
+                        }
+                        .padding(16)
+                    }
+                    .frame(minHeight: 140, maxHeight: 260)
+                    .onChange(of: messages) { _ in
+                        withAnimation { proxy.scrollTo(messages.last?.id, anchor: .bottom) }
+                    }
+                }
+                
+                // Input Area
+                Divider()
+                HStack(spacing: 10) {
+                    TextField("Escribe tu pregunta...", text: $inputText)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .font(.subheadline)
+                        .onSubmit(handleSend)
+                    
+                    Button(action: handleSend) {
+                        Image(systemName: "paperplane.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.white)
+                            .frame(width: 36, height: 36)
+                            .background(
+                                LinearGradient(colors: [.orange, .emerald], startPoint: .leading, endPoint: .trailing)
+                            )
+                            .cornerRadius(12)
+                            .opacity(inputText.isEmpty || isLoading ? 0.4 : 1.0)
+                    }
+                    .disabled(inputText.isEmpty || isLoading)
+                }
+                .padding(12)
+            }
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.05), radius: 5)
+            .padding(.horizontal, 20)
+        }
+        .padding(.vertical, 16)
     }
-  };
+    
+    // 2. Faux LLM Logic
+    private func handleSend() {
+        guard !inputText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        
+        let userMsg = Message(role: .user, content: inputText)
+        withAnimation(.easeOut(duration: 0.3)) {
+            messages.append(userMsg)
+            inputText = ""
+            isLoading = true
+        }
+        
+        // Faux API Call
+        Task {
+            try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5s delay
+            
+            let responseText = "Entiendo que estés buscando apoyo. Como tu asistente de Coppel, estoy aquí para escucharte y ofrecerte recursos de bienestar."
+            
+            withAnimation(.easeOut(duration: 0.3)) {
+                messages.append(Message(role: .assistant, content: responseText))
+                isLoading = false
+            }
+        }
+    }
+}
 
-  return (
-    <section className="px-5 mt-6 mb-4" aria-labelledby="ai-title">
-      <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="w-4 h-4 text-primary" aria-hidden="true" />
-        <h2 id="ai-title" className="text-lg font-heading font-bold text-foreground">
-          Tu Acompañante AI
-        </h2>
-      </div>
+// 3. Subviews
+struct MessageBubble: View {
+    let message: Message
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            if message.role == .assistant {
+                BotAvatar()
+            } else {
+                Spacer()
+            }
+            
+            Text(message.content)
+                .font(.subheadline)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(message.role == .user ? Color.blue : Color(.systemGray6))
+                .foregroundColor(message.role == .user ? .white : .primary)
+                .clipShape(RoundedCorner(radius: 16, corners: message.role == .user ? [.topLeft, .topRight, .bottomLeft] : [.topLeft, .topRight, .bottomRight]))
+            
+            if message.role == .assistant {
+                Spacer()
+            }
+        }
+    }
+}
 
-      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-        {/* Messages */}
-        <div className="p-4 space-y-3 min-h-[140px] max-h-[260px] overflow-y-auto">
-          {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Bot className="w-3.5 h-3.5 text-white" aria-hidden="true" />
-                </div>
-              )}
-              <div
-                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm font-body leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-muted text-foreground rounded-bl-md"
-                }`}
-              >
-                {msg.content}
-              </div>
-            </motion.div>
-          ))}
-          {isLoading && (
-            <div className="flex gap-2 items-center">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-emerald-400 flex items-center justify-center flex-shrink-0">
-                <Bot className="w-3.5 h-3.5 text-white" />
-              </div>
-              <div className="bg-muted rounded-2xl px-4 py-3 rounded-bl-md">
-                <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+struct LoadingBubble: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            BotAvatar()
+            HStack(spacing: 4) {
+                DotView(delay: 0)
+                DotView(delay: 0.2)
+                DotView(delay: 0.4)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.systemGray6))
+            .cornerRadius(16)
+            Spacer()
+        }
+    }
+}
 
-        {/* Input */}
-        <div className="border-t border-border p-3 flex gap-2">
-          <Input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSend()}
-            placeholder="Escribe tu pregunta..."
-            className="rounded-xl bg-muted/50 border-0 text-sm font-body"
-            aria-label="Escribe tu pregunta al acompañante AI"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="w-9 h-9 rounded-xl bg-gradient-to-r from-orange-400 to-emerald-400 flex items-center justify-center text-white disabled:opacity-40 transition-all hover:shadow-md hover:scale-105 flex-shrink-0"
-            aria-label="Enviar mensaje"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </section>
-  );
+struct BotAvatar: View {
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.orange, .emerald], startPoint: .topLeading, endPoint: .bottomTrailing)
+            Image(systemName: "cpu") // Using CPU as a Bot placeholder
+                .font(.system(size: 10))
+                .foregroundColor(.white)
+        }
+        .frame(width: 28, height: 28)
+        .clipShape(Circle())
+        .padding(.top, 2)
+    }
+}
+
+struct DotView: View {
+    @State private var scale: CGFloat = 0.5
+    let delay: Double
+    
+    var body: some View {
+        Circle()
+            .fill(Color.gray.opacity(0.4))
+            .frame(width: 6, height: 6)
+            .scaleEffect(scale)
+            .onAppear {
+                withAnimation(Animation.easeInOut(duration: 0.6).repeatForever().delay(delay)) {
+                    scale = 1.0
+                }
+            }
+    }
+}
+
+// Helper for specific corner rounding
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
 }
