@@ -339,7 +339,7 @@ struct QuestionnaireView: View {
         } label: {
             Group {
                 if vm.isSaved {
-                    Label("¡Guardado!", systemImage: "checkmark.seal.fill")
+                    Label("¡Guardado!", systemImage: "checkmark.seal")
                 } else {
                     Text("Enviar respuestas")
                 }

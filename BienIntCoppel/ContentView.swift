@@ -9,28 +9,28 @@ struct ContentView: View {
             // MARK: - Home Tab
             MainView()
                 .tabItem {
-                    Label("Home", systemImage: "house.fill")
+                    Label("Home", systemImage: "house")
                 }
                 .tag(0)
             
             // MARK: - Comunidad Tab
             ComunidadView()
                 .tabItem {
-                    Label("Comunidad", systemImage: "person.2.fill")
+                    Label("Comunidad", systemImage: "person.2")
                 }
                 .tag(1)
             
             // MARK: - Preguntas Tab
             PreguntasView()
                 .tabItem {
-                    Label("Preguntas", systemImage: "bubble.left.fill")
+                    Label("Preguntas", systemImage: "bubble.left")
                 }
                 .tag(2)
             
             // MARK: - Ajustes Tab
             AjustesView()
                 .tabItem {
-                    Label("Ajustes", systemImage: "gearshape.fill")
+                    Label("Ajustes", systemImage: "gearshape")
                 }
                 .tag(3)
             .accentColor(.orange)

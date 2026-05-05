@@ -76,7 +76,7 @@ struct RecommendedExerciseView: View {
                         tracker.registrarClic(categoria: categoria)
                         mostrarDetalle = true
                     }) {
-                        Image(systemName: "play.fill")
+                        Image(systemName: "play")
                             .font(.system(size: 13))
                             .foregroundColor(.white)
                             .frame(width: 40, height: 40)

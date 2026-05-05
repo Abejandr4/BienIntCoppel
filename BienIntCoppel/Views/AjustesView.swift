@@ -65,11 +65,11 @@ struct AjustesView: View {
                     
                     // Group 1: General Settings
                     VStack(spacing: 0) {
-                        SettingsRow(icon: "bell.fill", label: "Notificaciones", variant: .toggle($notificationsEnabled))
+                        SettingsRow(icon: "bell", label: "Notificaciones", variant: .toggle($notificationsEnabled))
                         Divider().padding(.leading, 55)
-                        SettingsRow(icon: "shield.fill", label: "Privacidad", variant: .arrow)
+                        SettingsRow(icon: "shield", label: "Privacidad", variant: .arrow)
                         Divider().padding(.leading, 55)
-                        SettingsRow(icon: "moon.fill", label: "Modo oscuro", variant: .toggle($darkModeEnabled))
+                        SettingsRow(icon: "moon", label: "Modo oscuro", variant: .toggle($darkModeEnabled))
                     }
                     .background(Color.white)
                     .cornerRadius(20)
