@@ -2,56 +2,208 @@ import Foundation
 import FoundationModels
 internal import Combine
 
+//es el que se encarga de mostrar el UI
+
 @MainActor
 class QuestionnaireViewModel: ObservableObject {
     
-    // MARK: Pregunta activa
-    @Published var multipleChoiceQuestion: String
-    @Published var options: [String]
-    @Published var openQuestion: String
-    private var currentRiskWeights: [Int]
+    // MARK: - Preguntas activas (siempre 2)
+    @Published var activeQuestions: [BurnoutQuestion] = []
     
-    // MARK: Respuestas del usuario
-    @Published var selectedOption: String = ""
-    @Published var selectedOptionIndex: Int = -1
-    @Published var openAnswer: String = ""
+    // MARK: - Respuestas del usuario [questionID: respuesta]
+    @Published var textAnswers: [UUID: String] = [:]
+    @Published var selectedOptions: [UUID: (index: Int, text: String)] = [:]
     
-    // MARK: Estado UI
+    // MARK: - Estado UI
     @Published var isLoading = false
     @Published var isSaved = false
     @Published var errorMessage: String?
-    @Published var usingAI = false  // para mostrarle al usuario qué modo está activo
+    @Published var usingAI = false
     
+    // MARK: - Privado
     private let store: QuestionnaireStore
-    
-    // FoundationModels: se inicializa solo si está disponible
-    private var session: LanguageModelSession?
     private var aiAvailable = false
+    private var session: LanguageModelSession?
     
-    // MARK: - Init
+    // Dimensiones ya vistas en las últimas N sesiones (para no repetir)
+    private var recentDimensions: [BurnoutDimension] = []
     
     init(store: QuestionnaireStore) {
         self.store = store
-        
-        // Cargar el par heurístico que corresponde a esta sesión
-        let pair = QuestionBank.pair(forEntry: store.nextQuestionIndex)
-        self.multipleChoiceQuestion = pair.multipleChoiceQuestion
-        self.options = pair.options
-        self.openQuestion = pair.openQuestion
-        self.currentRiskWeights = pair.riskWeights
-        
-        // Intentar inicializar Apple Intelligence
-        Task { await self.setupAI() }
+        loadNextQuestions()
+        Task { await setupAI() }
     }
     
-    // MARK: - Detección de Apple Intelligence
+    // MARK: - Cargar siguiente par de preguntas
+    
+    func loadNextQuestions() {
+        let pair = selectQuestionPair()
+        activeQuestions = pair
+        textAnswers = [:]
+        selectedOptions = [:]
+        isSaved = false
+    }
+    
+    // MARK: - Selección del par
+    
+    private func selectQuestionPair() -> [BurnoutQuestion] {
+        
+        // 1. Elegir 2 dimensiones distintas, priorizando las menos vistas
+        let dim1 = pickDimension(excluding: [])
+        let dim2 = pickDimension(excluding: [dim1])
+        
+        // 2. Para cada dimensión, elegir el tipo según preferencias del usuario
+        let type1 = store.pickWeightedType()
+        let type2 = store.pickWeightedType(excluding: type1) // segunda pregunta de tipo distinto
+        
+        let q1 = pickQuestion(dimension: dim1, preferredType: type1)
+        let q2 = pickQuestion(dimension: dim2, preferredType: type2)
+        
+        // Actualizar historial de dimensiones recientes
+        recentDimensions.append(contentsOf: [dim1, dim2])
+        if recentDimensions.count > 6 { recentDimensions.removeFirst(2) }
+        
+        return [q1, q2]
+    }
+    
+    /// Elige la dimensión con mayor necesidad de seguimiento,
+    /// evitando repetir las recientes y priorizando las de mayor riesgo acumulado.
+    private func pickDimension(excluding: [BurnoutDimension]) -> BurnoutDimension {
+        let all = BurnoutDimension.allCases
+        let recent = Set(recentDimensions.suffix(4))
+        let excluded = Set(excluding)
+        
+        // Preferir dimensiones no vistas recientemente
+        let candidates = all.filter { !recent.contains($0) && !excluded.contains($0) }
+        let pool = candidates.isEmpty
+            ? all.filter { !excluded.contains($0) }
+            : candidates
+        
+        // Puntuar cada dimensión según riesgo acumulado en entradas recientes
+        let riskScores = dimensionRiskScores()
+        
+        // Ordenar de mayor a menor riesgo y elegir con algo de aleatoriedad
+        // (no siempre la de mayor riesgo, para no generar ansiedad por repetición)
+        let sorted = pool.sorted { (riskScores[$0] ?? 0) > (riskScores[$1] ?? 0) }
+        
+        // 70 % elige la de mayor riesgo del pool, 30 % elige aleatoriamente
+        if Double.random(in: 0..<1) < 0.7, let first = sorted.first {
+            return first
+        }
+        return pool.randomElement() ?? .cargaLaboral
+    }
+    
+    private func dimensionRiskScores() -> [BurnoutDimension: Int] {
+        var scores: [BurnoutDimension: Int] = [:]
+        let recent = store.entries.suffix(5)
+        
+        for entry in recent {
+            for response in entry.responses {
+                scores[response.dimension, default: 0] += response.riskWeight
+            }
+        }
+        return scores
+    }
+    
+    /// Elige la pregunta de la dimensión que más se acerque al tipo preferido.
+    /// Si no hay de ese tipo en esa dimensión, usa cualquiera disponible.
+    private func pickQuestion(dimension: BurnoutDimension,
+                              preferredType: QuestionType) -> BurnoutQuestion {
+        let pool = QuestionBank.questions(for: dimension)
+        
+        // Evitar repetir preguntas ya vistas recientemente
+        let recentTexts = Set(store.entries.suffix(3).flatMap { $0.responses.map(\.questionText) })
+        let fresh = pool.filter { !recentTexts.contains($0.text) }
+        let candidates = fresh.isEmpty ? pool : fresh
+        
+        return candidates.first(where: { $0.type == preferredType })
+            ?? candidates.randomElement()
+            ?? pool[0]
+    }
+    
+    // MARK: - Enviar respuestas
+    
+    func submitAndGenerate() async {
+        let responses = buildResponses()
+        guard !responses.isEmpty else { return }
+        
+        let entry = QuestionnaireEntry(
+            id: UUID(),
+            date: Date(),
+            responses: responses
+        )
+        store.save(entry: entry)
+        isSaved = true
+        isLoading = true
+        
+        if aiAvailable {
+            await generateWithAI()
+        } else {
+            loadNextQuestions()
+        }
+        
+        isLoading = false
+    }
+    
+    private func buildResponses() -> [QuestionResponse] {
+        var result: [QuestionResponse] = []
+        
+        for question in activeQuestions {
+            switch question.type {
+            case .openText:
+                let text = textAnswers[question.id] ?? ""
+                // Incluir aunque esté vacío si la otra pregunta tiene respuesta
+                result.append(QuestionResponse(
+                    questionText: question.text,
+                    questionType: question.type,
+                    dimension: question.dimension,
+                    textAnswer: text.isEmpty ? nil : text,
+                    selectedOption: nil,
+                    riskWeight: 0
+                ))
+                
+            case .multipleChoiceText, .multipleChoiceEmoji:
+                if let selection = selectedOptions[question.id] {
+                    let weight = question.riskWeights?[safe: selection.index] ?? 0
+                    result.append(QuestionResponse(
+                        questionText: question.text,
+                        questionType: question.type,
+                        dimension: question.dimension,
+                        textAnswer: nil,
+                        selectedOption: selection.text,
+                        riskWeight: weight
+                    ))
+                } else {
+                    // Sin respuesta: incluir con peso neutro
+                    result.append(QuestionResponse(
+                        questionText: question.text,
+                        questionType: question.type,
+                        dimension: question.dimension,
+                        textAnswer: nil,
+                        selectedOption: nil,
+                        riskWeight: 0
+                    ))
+                }
+            }
+        }
+        
+        // Al menos una respuesta debe tener contenido
+        let hasAnyContent = result.contains {
+            $0.textAnswer != nil || $0.selectedOption != nil
+        }
+        return hasAnyContent ? result : []
+    }
+    
+    var canSubmit: Bool {
+        let hasText = textAnswers.values.contains { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        let hasOption = !selectedOptions.isEmpty
+        return hasText || hasOption
+    }
+    
+    // MARK: - Apple Intelligence
     
     private func setupAI() async {
-        // SystemLanguageModel.default lanza error si el dispositivo
-        // no soporta Foundation Models (iOS < 18.1 o sin Apple Intelligence)
         do {
-            let model = SystemLanguageModel.default
-            // Una llamada vacía para validar disponibilidad
             let probe = LanguageModelSession()
             _ = try await probe.respond(to: "ping")
             session = LanguageModelSession(tools: [GenerateQuestionsTool()])
@@ -60,170 +212,102 @@ class QuestionnaireViewModel: ObservableObject {
         } catch {
             aiAvailable = false
             usingAI = false
-            // Silencioso: el fallback heurístico ya está listo
         }
     }
-    
-    // MARK: - Guardar y generar siguiente ronda
-    
-    func submitAndGenerate() async {
-        // Solo requiere que al menos una respuesta esté presente
-        let hasMultipleChoice = selectedOptionIndex >= 0
-        let hasOpenAnswer = !openAnswer.trimmingCharacters(in: .whitespaces).isEmpty
-        
-        guard hasMultipleChoice || hasOpenAnswer else { return }
-
-        let weight = hasMultipleChoice
-            ? (currentRiskWeights[safe: selectedOptionIndex] ?? 0)
-            : 0  // peso neutro si no se respondió la opción múltiple
-
-        let entry = QuestionnaireEntry(
-            id: UUID(),
-            date: Date(),
-            multipleChoiceQuestion: multipleChoiceQuestion,
-            multipleChoiceAnswer: hasMultipleChoice ? selectedOption : "",
-            multipleChoiceRiskWeight: weight,
-            openQuestion: openQuestion,
-            openAnswer: hasOpenAnswer ? openAnswer : ""
-        )
-        store.save(entry: entry)
-        isSaved = true
-
-        isLoading = true
-
-        if aiAvailable {
-            await generateWithAI()
-        } else {
-            await generateWithHeuristic()
-        }
-
-        isLoading = false
-    }
-    
-    // MARK: - Generación con Apple Intelligence
     
     private func generateWithAI() async {
-        guard let session else {
-            await generateWithHeuristic()
-            return
-        }
+        guard let session else { loadNextQuestions(); return }
         
-        let context = buildContext()
+        let context = store.entries.suffix(5).flatMap { $0.responses }.map {
+            "[\($0.dimension.rawValue)] \($0.questionText): \($0.textAnswer ?? $0.selectedOption ?? "sin respuesta") (peso: \($0.riskWeight))"
+        }.joined(separator: "\n")
+        
+        let weights = store.selectionWeights()
+        let typeHint = weights.max(by: { $0.value < $1.value })?.key.rawValue ?? "multipleChoiceEmoji"
+        
         let prompt = """
-        Eres un asistente empático de salud mental preventiva.
-        Basándote en estas respuestas recientes del usuario, genera nuevas preguntas en español:
+        Eres un asistente especializado en detección de burnout laboral en empleados de Coppel.
+        Genera exactamente 2 preguntas nuevas en español, en JSON, sin texto adicional.
         
+        Historial reciente:
         \(context)
         
-        Responde ÚNICAMENTE con JSON, sin texto adicional:
-        {
-          "multipleChoiceQuestion": "<pregunta>",
-          "options": ["<op1>", "<op2>", "<op3>", "<op4>"],
-          "openQuestion": "<pregunta abierta empática>"
-        }
-        Las opciones van de mejor (índice 0) a peor estado (índice 3).
+        El usuario prefiere preguntas de tipo "\(typeHint)".
+        
+        Tipos válidos: "openText", "multipleChoiceText", "multipleChoiceEmoji"
+        Dimensiones válidas: "cargaLaboral", "agotamientoEmocional", "despersonalizacion", "realizacionPersonal", "indicadoresFisicos"
+        
+        Formato:
+        [
+          {
+            "dimension": "<dimensión>",
+            "type": "<tipo>",
+            "text": "<pregunta>",
+            "options": ["<op1>","<op2>","<op3>","<op4>"] // null si openText
+          },
+          { ... }
+        ]
+        Las opciones deben ir de mejor (índice 0) a peor estado (índice 3).
+        Si el tipo es "multipleChoiceEmoji", cada opción debe comenzar con un emoji relevante.
         """
         
         do {
             let response = try await session.respond(to: prompt)
-            if !parseAndApply(json: response.content) {
-                // Si el JSON falla, caer al heurístico
-                await generateWithHeuristic()
+            if !parseAIQuestions(json: response.content) {
+                loadNextQuestions()
             }
         } catch {
-            await generateWithHeuristic()
+            loadNextQuestions()
         }
-    }
-    
-    // MARK: - Generación heurística (fallback)
-    
-    private func generateWithHeuristic() async {
-        // Simula un pequeño delay para UX coherente
-        try? await Task.sleep(nanoseconds: 400_000_000)
-        
-        let nextIndex = store.entries.count  // ya incluye la que acabamos de guardar
-        let pair = selectAdaptivePair(nextIndex: nextIndex)
-        
-        applyPair(pair)
-        usingAI = false
-    }
-    
-    /// Elige el siguiente par considerando las respuestas recientes.
-    /// Si el riesgo es alto, prioriza preguntas sobre sueño y relaciones.
-    /// Si es bajo, rota normalmente.
-    private func selectAdaptivePair(nextIndex: Int) -> QuestionBank.QuestionPair {
-        let risk = store.riskLevel
-        
-        switch risk {
-        case .alto:
-            // Priorizar índices 2 (sueño) y 5 (relaciones) que son más reveladores
-            let highRiskIndices = [2, 5, 1, 6]
-            let candidate = highRiskIndices.first {
-                // No repetir la misma pregunta que se acaba de responder
-                QuestionBank.pairs[$0].multipleChoiceQuestion != multipleChoiceQuestion
-            } ?? nextIndex % QuestionBank.pairs.count
-            return QuestionBank.pairs[candidate]
-            
-        case .moderado:
-            // Rotar entre motivación (3), concentración (4) y autocuidado (6)
-            let moderateIndices = [3, 4, 6, 0]
-            let candidate = moderateIndices.first {
-                QuestionBank.pairs[$0].multipleChoiceQuestion != multipleChoiceQuestion
-            } ?? nextIndex % QuestionBank.pairs.count
-            return QuestionBank.pairs[candidate]
-            
-        default:
-            // Rotación normal determinista
-            return QuestionBank.pair(forEntry: nextIndex)
-        }
-    }
-    
-    // MARK: - Helpers
-    
-    private func buildContext() -> String {
-        store.entries.suffix(5).map {
-            "• \($0.multipleChoiceQuestion): \($0.multipleChoiceAnswer). \($0.openQuestion): \($0.openAnswer)"
-        }.joined(separator: "\n")
     }
     
     @discardableResult
-    private func parseAndApply(json: String) -> Bool {
-        guard let data = json.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let mcq = obj["multipleChoiceQuestion"] as? String,
-              let opts = obj["options"] as? [String],
-              let oq = obj["openQuestion"] as? String,
-              opts.count == 4
+    private func parseAIQuestions(json: String) -> Bool {
+        // Limpiar posibles bloques de código markdown
+        let clean = json
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard let data = clean.data(using: .utf8),
+              let arr = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+              arr.count == 2
         else { return false }
         
-        multipleChoiceQuestion = mcq
-        options = opts
-        openQuestion = oq
-        // Las preguntas de AI no tienen pesos explícitos; usamos posición como proxy
-        currentRiskWeights = [0, 0, 2, 3]
-        resetAnswers()
-        return true
-    }
-    
-    private func applyPair(_ pair: QuestionBank.QuestionPair) {
-        multipleChoiceQuestion = pair.multipleChoiceQuestion
-        options = pair.options
-        openQuestion = pair.openQuestion
-        currentRiskWeights = pair.riskWeights
-        resetAnswers()
-    }
-    
-    private func resetAnswers() {
-        selectedOption = ""
-        selectedOptionIndex = -1
-        openAnswer = ""
+        var parsed: [BurnoutQuestion] = []
+        
+        for obj in arr {
+            guard let dimRaw = obj["dimension"] as? String,
+                  let typeRaw = obj["type"] as? String,
+                  let text = obj["text"] as? String,
+                  let dimension = BurnoutDimension(rawValue: dimRaw),
+                  let qType = QuestionType(rawValue: typeRaw)
+            else { return false }
+            
+            let options = obj["options"] as? [String]
+            let weights = qType == .openText ? nil : [0, 1, 2, 3]
+            
+            parsed.append(BurnoutQuestion(
+                dimension: dimension,
+                type: qType,
+                text: text,
+                options: options,
+                riskWeights: weights
+            ))
+        }
+        
+        activeQuestions = parsed
+        textAnswers = [:]
+        selectedOptions = [:]
         isSaved = false
+        return true
     }
 }
 
-// MARK: - Extensión segura de Array
 
-private extension Array {
+// MARK: - Array safe subscript
+
+extension Array {
     subscript(safe index: Int) -> Element? {
         indices.contains(index) ? self[index] : nil
     }
