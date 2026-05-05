@@ -47,6 +47,7 @@ struct AIGeneratedPair {
 struct GenerateQuestionsTool: Tool {
     func call(arguments: Arguments) async throws -> String {
         //no se necesita hacer nada aquí porque la herramienta genera las preguntas abajo
+        return "okas"
     }
     
     typealias Output = String
