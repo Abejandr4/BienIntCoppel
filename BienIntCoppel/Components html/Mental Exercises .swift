@@ -8,6 +8,7 @@ struct MentalExercise: Identifiable {
     let colors: [Color]
     let iconColor: Color
     let duration: String
+    let description: String
 }
 
 struct MentalExercisesView: View {
@@ -19,7 +20,8 @@ struct MentalExercisesView: View {
             icon: "laurel.leading",
             colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color(red: 0.98, green: 0.98, blue: 1.0)],
             iconColor: .purple,
-            duration: "5 min"
+            duration: "5 min",
+            description: "hola"
         ),
         MentalExercise(
             title: "Técnicas de Respiración",
@@ -27,7 +29,8 @@ struct MentalExercisesView: View {
             icon: "wind",
             colors: [Color(red: 0.92, green: 0.96, blue: 1.0), Color(red: 0.98, green: 0.99, blue: 1.0)],
             iconColor: .blue,
-            duration: "3 min"
+            duration: "3 min",
+            description: "hola"
         ),
         MentalExercise(
             title: "Mindfulness Laboral",
@@ -35,7 +38,8 @@ struct MentalExercisesView: View {
             icon: "headphones",
             colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color(red: 0.97, green: 1.0, blue: 0.98)],
             iconColor: .green,
-            duration: "10 min"
+            duration: "10 min",
+            description: "hola"
         )
     ]
 
