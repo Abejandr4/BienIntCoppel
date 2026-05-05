@@ -1,0 +1,212 @@
+import SwiftUI
+
+// MARK: - MentalExercise Model
+struct MentalExercise: Identifiable {
+    let id = UUID()
+    let title: String
+    let benefit: String
+    let icon: String
+    let colors: [Color]
+    let iconColor: Color
+    let duration: String
+    let description: String
+}
+
+struct ExercisesData {
+    static let all: [MentalExercise] = [
+
+        // MARK: Respiración
+        MentalExercise(
+            title: "Respiración Diafragmática",
+            benefit: "Calma inmediata y reducción de la tensión en el pecho.",
+            icon: "wind",
+            colors: [Color(red: 0.92, green: 0.96, blue: 1.0), Color.white],
+            iconColor: .blue,
+            duration: "5 min",
+            description: "Inhalar profundamente permitiendo que el abdomen se expanda, mientras el pecho permanece quieto."
+        ),
+        MentalExercise(
+            title: "Técnica 4-7-8",
+            benefit: "Sedación del sistema nervioso y mejora del enfoque.",
+            icon: "lungs.fill",
+            colors: [Color(red: 0.92, green: 0.96, blue: 1.0), Color.white],
+            iconColor: .blue,
+            duration: "2 min",
+            description: "Inhalar en 4 segundos, retener el aire 7 segundos y exhalar con un soplido en 8 segundos."
+        ),
+        MentalExercise(
+            title: "Respiración Cuadrada",
+            benefit: "Estabilización emocional durante crisis.",
+            icon: "square",
+            colors: [Color(red: 0.92, green: 0.96, blue: 1.0), Color.white],
+            iconColor: .blue,
+            duration: "4 min",
+            description: "Inhalar, retener, exhalar y mantener los pulmones vacíos, cada fase durante 4 segundos."
+        ),
+        MentalExercise(
+            title: "Respiración Coherente (5-5)",
+            benefit: "Sincronización entre el corazón y el cerebro.",
+            icon: "waveform.path.ecg",
+            colors: [Color(red: 0.92, green: 0.96, blue: 1.0), Color.white],
+            iconColor: .blue,
+            duration: "3 min",
+            description: "Realizar ciclos de inhalación y exhalación de 5 segundos cada uno, de manera rítmica y sin pausas."
+        ),
+        MentalExercise(
+            title: "Exhalación Prosódica",
+            benefit: "Estimulación acústica del nervio vago.",
+            icon: "waveform",
+            colors: [Color(red: 0.92, green: 0.96, blue: 1.0), Color.white],
+            iconColor: .blue,
+            duration: "2 min",
+            description: "Al exhalar, emitir un susurro o un tono suave (tarareo) para generar vibración interna."
+        ),
+
+        // MARK: Mindfulness
+        MentalExercise(
+            title: "Grounding 5-4-3-2-1",
+            benefit: "Interrupción de ataques de pánico o ansiedad aguda.",
+            icon: "hand.point.up.left.fill",
+            colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
+            iconColor: .green,
+            duration: "3 min",
+            description: "Identificar 5 cosas que ves, 4 que tocas, 3 que oyes, 2 que hueles y 1 que saboreas."
+        ),
+        MentalExercise(
+            title: "Escaneo Corporal Exprés",
+            benefit: "Identificación de somatizaciones por estrés.",
+            icon: "figure.walk.motion",
+            colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
+            iconColor: .green,
+            duration: "5 min",
+            description: "Recorrer mentalmente el cuerpo de pies a cabeza, enviando la orden de relajar cada zona."
+        ),
+        MentalExercise(
+            title: "Cambio de Presencia",
+            benefit: "Pausa deliberada antes de una nueva tarea.",
+            icon: "clock.arrow.2.dotpath",
+            colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
+            iconColor: .green,
+            duration: "1 min",
+            description: "Pausa deliberada antes de una nueva tarea para observar una sensación física inmediata."
+        ),
+        MentalExercise(
+            title: "Alimentación Consciente",
+            benefit: "Desconexión sensorial y regulación metabólica.",
+            icon: "fork.knife",
+            colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
+            iconColor: .green,
+            duration: "Tiempo de comida",
+            description: "Enfocarse en las texturas, sabores y aromas de los alimentos, sin distracciones digitales."
+        ),
+        MentalExercise(
+            title: "Observación de Objeto Neutral",
+            benefit: "Recuperación de la atención ejecutiva.",
+            icon: "eye.fill",
+            colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
+            iconColor: .green,
+            duration: "2 min",
+            description: "Mirar fijamente un objeto (ej. una planta) y notar sus detalles físicos."
+        ),
+
+        // MARK: Somático
+        MentalExercise(
+            title: "Relajación Muscular Progresiva",
+            benefit: "Liberación de contracturas por estrés sostenido.",
+            icon: "figure.flexibility",
+            colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color.white],
+            iconColor: .purple,
+            duration: "10 min",
+            description: "Tensar fuertemente un grupo muscular por 5 segundos y relajarlo súbitamente por 10."
+        ),
+        MentalExercise(
+            title: "Tapping (EFT)",
+            benefit: "Desensibilización ante disparadores emocionales.",
+            icon: "hand.tap.fill",
+            colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color.white],
+            iconColor: .purple,
+            duration: "5 min",
+            description: "Golpear suavemente puntos específicos del cuerpo mientras se repite una frase de validación."
+        ),
+        MentalExercise(
+            title: "Empuje Isométrico",
+            benefit: "Descarga de frustración o ira reprimida.",
+            icon: "figure.strengthtraining.traditional",
+            colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color.white],
+            iconColor: .purple,
+            duration: "1 min",
+            description: "Empujar una pared con toda la fuerza durante 10 segundos mientras se exhala lentamente."
+        ),
+        MentalExercise(
+            title: "Sacudida Somática",
+            benefit: "Liberación de adrenalina acumulada tras un conflicto.",
+            icon: "waveform",
+            colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color.white],
+            iconColor: .purple,
+            duration: "2 min",
+            description: "Sacudir manos, brazos y piernas vigorosamente para sacudirse la tensión del momento."
+        ),
+        MentalExercise(
+            title: "Pendulación de Sensaciones",
+            benefit: "Ampliación de la ventana de tolerancia emocional.",
+            icon: "metronome.fill",
+            colors: [Color(red: 0.95, green: 0.93, blue: 1.0), Color.white],
+            iconColor: .purple,
+            duration: "5 min",
+            description: "Alternar el foco entre una sensación de tensión y una zona de neutralidad en el cuerpo."
+        ),
+
+        // MARK: Escritura
+        MentalExercise(
+            title: "Diario de Vaciado",
+            benefit: "Reducción de la carga cognitiva y rumiación.",
+            icon: "square.and.pencil",
+            colors: [Color(red: 1.0, green: 0.95, blue: 0.90), Color.white],
+            iconColor: .orange,
+            duration: "10 min",
+            description: "Escribir sin filtro todo lo que genera estrés en el momento, sin preocuparse por la gramática."
+        ),
+        MentalExercise(
+            title: "El Lenguaje Mágico del Yo",
+            benefit: "Mejora de la comunicación asertiva.",
+            icon: "quote.bubble.fill",
+            colors: [Color(red: 1.0, green: 0.95, blue: 0.90), Color.white],
+            iconColor: .orange,
+            duration: "5 min",
+            description: "Traducir quejas contra otros en expresiones de necesidad personal."
+        ),
+        MentalExercise(
+            title: "Diario de Gratitud",
+            benefit: "Reentrenamiento del sesgo de negatividad.",
+            icon: "heart.text.square.fill",
+            colors: [Color(red: 1.0, green: 0.95, blue: 0.90), Color.white],
+            iconColor: .orange,
+            duration: "3 min",
+            description: "Anotar 3 cosas específicas por las que estás agradecido, detallando por qué fueron positivas."
+        ),
+        MentalExercise(
+            title: "Reencuadre de Fortalezas",
+            benefit: "Empoderamiento ante la autocrítica severa.",
+            icon: "sparkles",
+            colors: [Color(red: 1.0, green: 0.95, blue: 0.90), Color.white],
+            iconColor: .orange,
+            duration: "10 min",
+            description: "Identificar un defecto percibido y escribir cómo esa misma cualidad puede ser una fortaleza."
+        ),
+        MentalExercise(
+            title: "Plan Micro-conductual",
+            benefit: "Reducción de la parálisis por análisis.",
+            icon: "checklist",
+            colors: [Color(red: 1.0, green: 0.95, blue: 0.90), Color.white],
+            iconColor: .orange,
+            duration: "2 min",
+            description: "Escribir una sola acción pequeña y manejable para la próxima hora."
+        )
+    ]
+
+    // MARK: - Filtros por categoría (usados por ExerciseRecommendationEngine)
+    static var respiracion: [MentalExercise] { all.filter { $0.iconColor == .blue } }
+    static var mindfulness:  [MentalExercise] { all.filter { $0.iconColor == .green } }
+    static var somatico:     [MentalExercise] { all.filter { $0.iconColor == .purple } }
+    static var escritura:    [MentalExercise] { all.filter { $0.iconColor == .orange } }
+}

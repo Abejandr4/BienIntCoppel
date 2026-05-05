@@ -1,34 +1,19 @@
 import SwiftUI
 
 // MARK: - RecommendedExerciseView
-// Agrégala dentro de MentalWellnessView, justo ANTES de MentalExercisesView().
-// Ejemplo:
-//   RecommendedExerciseView(scoresCuestionario: 50)
-//   MentalExercisesView()
+
 
 struct RecommendedExerciseView: View {
     
-    // Pasa aquí el score que ya genera tu QuestionnaireViewModel
+    // Score que ya genera tu QuestionnaireViewModel
     var scoresCuestionario: Int = 50
     
     @ObservedObject private var tracker = UserInteractionTracker.shared
     @State private var perfil: PerfilUsuario = .inactivo
     @State private var ejercicioRecomendado: MentalExercise? = nil
     
-    // Los ejercicios del JSON — reemplaza esto con tu fuente real cuando la conectes
-    private let ejercicios: [MentalExercise] = [
-        MentalExercise(title: "Respiración Diafragmática", benefit: "Calma inmediata y reducción de tensión.", icon: "wind", colors: [Color(red:0.92,green:0.96,blue:1.0), Color.white], iconColor: .blue, duration: "5 min", description: "Inhalar profundamente permitiendo que el abdomen se expanda."),
-        MentalExercise(title: "Técnica 4-7-8", benefit: "Sedación del sistema nervioso.", icon: "lungs.fill", colors: [Color(red:0.92,green:0.96,blue:1.0), Color.white], iconColor: .blue, duration: "2 min", description: "Inhalar 4s, retener 7s, exhalar 8s."),
-        MentalExercise(title: "Respiración Cuadrada", benefit: "Estabilización emocional durante crisis.", icon: "square", colors: [Color(red:0.92,green:0.96,blue:1.0), Color.white], iconColor: .blue, duration: "4 min", description: "Inhalar, retener, exhalar y mantener 4s cada fase."),
-        MentalExercise(title: "Grounding 5-4-3-2-1", benefit: "Interrupción de ataques de pánico.", icon: "hand.point.up.left.fill", colors: [Color(red:0.90,green:0.98,blue:0.94), Color.white], iconColor: .green, duration: "3 min", description: "5 cosas que ves, 4 que tocas, 3 que oyes, 2 que hueles, 1 que saboreas."),
-        MentalExercise(title: "Escaneo Corporal Exprés", benefit: "Identificación de somatizaciones por estrés.", icon: "figure.walk.motion", colors: [Color(red:0.90,green:0.98,blue:0.94), Color.white], iconColor: .green, duration: "5 min", description: "Recorrer mentalmente el cuerpo de pies a cabeza."),
-        MentalExercise(title: "Observación de Objeto Neutral", benefit: "Recuperación de la atención ejecutiva.", icon: "eye.fill", colors: [Color(red:0.90,green:0.98,blue:0.94), Color.white], iconColor: .green, duration: "2 min", description: "Mirar fijamente un objeto y notar sus detalles."),
-        MentalExercise(title: "Relajación Muscular Progresiva", benefit: "Liberación de contracturas por estrés.", icon: "figure.flexibility", colors: [Color(red:0.95,green:0.93,blue:1.0), Color.white], iconColor: .purple, duration: "10 min", description: "Tensar un grupo muscular 5s y relajar 10s."),
-        MentalExercise(title: "Sacudida Somática", benefit: "Liberación de adrenalina acumulada.", icon: "waveform", colors: [Color(red:0.95,green:0.93,blue:1.0), Color.white], iconColor: .purple, duration: "2 min", description: "Sacudir manos, brazos y piernas vigorosamente."),
-        MentalExercise(title: "Diario de Vaciado", benefit: "Reducción de la carga cognitiva.", icon: "square.and.pencil", colors: [Color(red:1.0,green:0.95,blue:0.90), Color.white], iconColor: .orange, duration: "10 min", description: "Escribir sin filtro todo lo que genera estrés."),
-        MentalExercise(title: "Diario de Gratitud", benefit: "Reentrenamiento del sesgo de negatividad.", icon: "heart.text.square.fill", colors: [Color(red:1.0,green:0.95,blue:0.90), Color.white], iconColor: .orange, duration: "3 min", description: "Anotar 3 cosas específicas por las que estás agradecido."),
-        MentalExercise(title: "Plan Micro-conductual", benefit: "Reducción de la parálisis por análisis.", icon: "checklist", colors: [Color(red:1.0,green:0.95,blue:0.90), Color.white], iconColor: .orange, duration: "2 min", description: "Escribir una sola acción pequeña para la próxima hora.")
-    ]
+    // Ejercicios del JSON
+    private let ejercicios = ExercisesData.all
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

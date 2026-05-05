@@ -74,32 +74,39 @@ class ExerciseRecommendationEngine {
         switch perfil {
             
         case .ansioso:
-            // Refuerza la categoría más usada
-            let categoriaMasUsada = categoriaConMasClicks(tracker: tracker)
-            return ejercicios
-                .filter { $0.title.lowercased().contains(categoriaMasUsada) }
-                .first ?? ejercicios.first
-            
+                // Refuerza la categoría más usada
+                let categoria = categoriaConMasClicks(tracker: tracker)
+                return ejerciciosPorCategoria(categoria).first
+
         case .estable:
-            // Promueve la categoría menos usada
-            let categoriaMenosUsada = categoriaConMenosClicks(tracker: tracker)
-            let candidatos = ejercicios.filter { $0.title.lowercased().contains(categoriaMenosUsada) }
-            // Dentro de esa categoría, el ejercicio más corto
-            return candidatos.min(by: { duracionEnMinutos($0.duration) < duracionEnMinutos($1.duration) })
-                ?? ejercicios.first
-            
+                // Promueve la categoría menos usada, el ejercicio más corto de esa categoría
+                let categoria = categoriaConMenosClicks(tracker: tracker)
+                return ejerciciosPorCategoria(categoria)
+                    .min(by: { duracionEnMinutos($0.duration) < duracionEnMinutos($1.duration) })
+
         case .inactivo:
-            // El ejercicio más corto de todo el catálogo
-            return ejercicios.min(by: { duracionEnMinutos($0.duration) < duracionEnMinutos($1.duration) })
-            
+                // El ejercicio más corto de todo el catálogo
+                return ExercisesData.all
+                    .min(by: { duracionEnMinutos($0.duration) < duracionEnMinutos($1.duration) })
+
         case .avanzado:
-            // Rota hacia la categoría menos visitada recientemente
-            let categoriaMenosUsada = categoriaConMenosClicks(tracker: tracker)
-            return ejercicios
-                .filter { $0.title.lowercased().contains(categoriaMenosUsada) }
-                .randomElement() ?? ejercicios.randomElement()
+                // Categoría menos visitada, ejercicio aleatorio
+                let categoria = categoriaConMenosClicks(tracker: tracker)
+                return ejerciciosPorCategoria(categoria).randomElement()
         }
     }
+    
+    // MARK: - Helper por categoría usando ExercisesData
+    private func ejerciciosPorCategoria(_ categoria: String) -> [MentalExercise] {
+        switch categoria {
+        case "respiracion": return ExercisesData.respiracion
+        case "mindfulness": return ExercisesData.mindfulness
+        case "somatico":    return ExercisesData.somatico
+        case "escritura":   return ExercisesData.escritura
+        default:            return ExercisesData.all
+        }
+    }
+    
     
     // MARK: - Helpers privados
     
