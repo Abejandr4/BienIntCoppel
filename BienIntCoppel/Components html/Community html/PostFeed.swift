@@ -1,133 +1,138 @@
-//
-//  PostFeed.swift
-//  BienIntCoppel
-//
-//  Created by Dev Jr. 19 on 04/05/26.
-//
+import SwiftUI
 
-import { useState } from "react";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
-import { motion } from "framer-motion";
+struct Post: Identifiable {
+    let id: Int
+    let user: String
+    let avatar: String
+    let time: String
+    let content: String
+    let tag: String
+    let tagColor: Color
+    let tagTextColor: Color
+    let likes: Int
+    let comments: Int
+    let image: String? // Optional since not all posts have images
+}
 
-const posts = [
-  {
-    id: 1,
-    user: "Ana Ramírez",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop",
-    time: "Hace 2 horas",
-    content: "¡Terminé mi primera sesión de meditación guiada! Me siento mucho más tranquila. 🧘‍♀️",
-    tag: "Meta Mental Cumplida",
-    tagColor: "bg-emerald-100 text-emerald-700",
-    likes: 24,
-    comments: 5,
-    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
-  },
-  {
-    id: 2,
-    user: "Carlos Mendoza",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop",
-    time: "Hace 5 horas",
-    content: "30 minutos de caminata durante el almuerzo. ¡Pequeños pasos hacen la diferencia! 💪",
-    tag: "Entrenamiento Físico",
-    tagColor: "bg-orange-100 text-orange-700",
-    likes: 18,
-    comments: 3,
-  },
-  {
-    id: 3,
-    user: "María López",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop",
-    time: "Hace 1 día",
-    content: "¡Logré ahorrar el 10% de mi quincena este mes! La planificación financiera funciona. 📊",
-    tag: "Logro Financiero",
-    tagColor: "bg-amber-100 text-amber-700",
-    likes: 32,
-    comments: 8,
-  },
-  {
-    id: 4,
-    user: "José Pérez",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop",
-    time: "Hace 2 días",
-    content: "Organizamos un torneo de futbol entre tiendas. ¡La mejor forma de hacer equipo! ⚽",
-    tag: "Evento Social",
-    tagColor: "bg-sky-100 text-sky-700",
-    likes: 45,
-    comments: 12,
-  },
-];
+struct PostFeed: View {
+    // 1. Data Source
+    let posts = [
+        Post(id: 1, user: "Ana Ramírez", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop", time: "Hace 2 horas", content: "¡Terminé mi primera sesión de meditación guiada! Me siento mucho más tranquila. 🧘‍♀️", tag: "Meta Mental Cumplida", tagColor: Color.emerald.opacity(0.1), tagTextColor: .emerald, likes: 24, comments: 5, image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop"),
+        Post(id: 2, user: "Carlos Mendoza", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop", time: "Hace 5 horas", content: "30 minutos de caminata durante el almuerzo. ¡Pequeños pasos hacen la diferencia! 💪", tag: "Entrenamiento Físico", tagColor: Color.orange.opacity(0.1), tagTextColor: .orange, likes: 18, comments: 3, image: nil),
+        Post(id: 3, user: "María López", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop", time: "Hace 1 día", content: "¡Logré ahorrar el 10% de mi quincena este mes! La planificación financiera funciona. 📊", tag: "Logro Financiero", tagColor: Color.yellow.opacity(0.1), tagTextColor: .orange, likes: 32, comments: 8, image: nil),
+        Post(id: 4, user: "José Pérez", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop", time: "Hace 2 días", content: "Organizamos un torneo de futbol entre tiendas. ¡La mejor forma de hacer equipo! ⚽", tag: "Evento Social", tagColor: Color.blue.opacity(0.1), tagTextColor: .blue, likes: 45, comments: 12, image: nil)
+    ]
+    
+    // 2. State for Likes
+    @State private var likedPosts: [Int: Bool] = [:]
 
-export default function PostFeed() {
-  const [likedPosts, setLikedPosts] = useState({});
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach(posts) { post in
+                    PostCard(
+                        post: post,
+                        isLiked: likedPosts[post.id, default: false],
+                        onLike: {
+                            likedPosts[post.id, default: false].toggle()
+                        }
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+        }
+    }
+}
 
-  const toggleLike = (id) => {
-    setLikedPosts(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+// 3. Individual Post Component
+struct PostCard: View {
+    let post: Post
+    let isLiked: Bool
+    let onLike: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            HStack(spacing: 12) {
+                AsyncImage(url: URL(string: post.avatar)) { img in
+                    img.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: { Color.gray.opacity(0.2) }
+                .frame(width: 36, height: 36)
+                .clipShape(Circle())
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(post.user)
+                        .font(.system(size: 14, weight: .semibold))
+                    Text(post.time)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Text(post.tag)
+                    .font(.system(size: 10, weight: .medium))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(post.tagColor)
+                    .foregroundColor(post.tagTextColor)
+                    .clipShape(Capsule())
+            }
+            .padding(16)
+            
+            // Text Content
+            Text(post.content)
+                .font(.system(size: 14))
+                .lineSpacing(4)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+            
+            // Post Image (if exists)
+            if let imageURL = post.image {
+                AsyncImage(url: URL(string: imageURL)) { img in
+                    img.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: { Color.gray.opacity(0.2) }
+                .frame(height: 180)
+                .frame(maxWidth: .infinity)
+                .clipped()
+            }
+            
+            // Action Bar
+            HStack(spacing: 24) {
+                Button(action: onLike) {
+                    HStack(spacing: 6) {
+                        Image(systemName: isLiked ? "heart.fill" : "heart")
+                            .foregroundColor(isLiked ? .red : .secondary)
+                        Text("\(post.likes + (isLiked ? 1 : 0))")
+                    }
+                }
+                
+                HStack(spacing: 6) {
+                    Image(systemName: "message")
+                    Text("\(post.comments)")
+                }
+                
+                Image(systemName: "square.and.arrow.up")
+                
+                Spacer()
+            }
+            .font(.system(size: 12))
+            .foregroundColor(.secondary)
+            .padding(16)
+            .border(Color.gray.opacity(0.1), width: 1) // Top border equivalent
+        }
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+}
 
-  return (
-    <section className="px-5 mt-4 space-y-4 pb-4" aria-label="Feed de la comunidad">
-      {posts.map((post, i) => (
-        <motion.article
-          key={post.id}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.08, duration: 0.35 }}
-          className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden"
-        >
-          {/* Header */}
-          <div className="p-4 pb-2 flex items-center gap-3">
-            <img
-              src={post.avatar}
-              alt={`Foto de perfil de ${post.user}`}
-              className="w-9 h-9 rounded-full object-cover"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-heading font-semibold text-foreground">{post.user}</p>
-              <p className="text-[10px] font-body text-muted-foreground">{post.time}</p>
-            </div>
-            <span className={`text-[10px] font-body font-medium px-2.5 py-1 rounded-full ${post.tagColor}`}>
-              {post.tag}
-            </span>
-          </div>
-
-          {/* Content */}
-          <div className="px-4 pb-3">
-            <p className="text-sm font-body text-foreground leading-relaxed">{post.content}</p>
-          </div>
-
-          {/* Image */}
-          {post.image && (
-            <img src={post.image} alt="" className="w-full h-44 object-cover" />
-          )}
-
-          {/* Actions */}
-          <div className="px-4 py-3 flex items-center gap-6 border-t border-border/50">
-            <button
-              onClick={() => toggleLike(post.id)}
-              className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-red-500 transition-colors"
-              aria-label={likedPosts[post.id] ? "Quitar me gusta" : "Dar me gusta"}
-            >
-              <Heart
-                className={`w-4 h-4 transition-all ${likedPosts[post.id] ? "fill-red-500 text-red-500 scale-110" : ""}`}
-              />
-              {post.likes + (likedPosts[post.id] ? 1 : 0)}
-            </button>
-            <button
-              className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-primary transition-colors"
-              aria-label="Comentar"
-            >
-              <MessageCircle className="w-4 h-4" />
-              {post.comments}
-            </button>
-            <button
-              className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-primary transition-colors"
-              aria-label="Compartir"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-          </div>
-        </motion.article>
-      ))}
-    </section>
-  );
+// Custom Emerald color extension to match Tailwind
+extension Color {
+    static let emerald = Color(red: 16/255, green: 185/255, blue: 129/255)
 }
