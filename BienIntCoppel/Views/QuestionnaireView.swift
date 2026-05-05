@@ -8,10 +8,9 @@ struct QuestionnaireView: View {
     @EnvironmentObject var appState: AppState
     @State private var showContactsView = false
     @State private var isHeaderVisible = true
-    @State private var activeRecommendations: [WellnessRecommendation] = []
-    @State private var showRecommendationBanner = false
+    @State private var showCompletionScreen = false
     
-  
+    
     @ScaledMetric private var baseFontSize: CGFloat = 14
     @ScaledMetric private var smallFontSize: CGFloat = 12
     @ScaledMetric private var iconSize: CGFloat = 16
@@ -24,72 +23,53 @@ struct QuestionnaireView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    
-                    if isHeaderVisible {
-                        headerCard
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
-                    
-                    if vm.isLoading {
-                        loadingCard
-                    } else {
-                        ForEach(vm.activeQuestions) { question in
-                            questionCard(for: question)
-                        }
-                        submitButton
-                    }
-                    
-                    if let error = vm.errorMessage {
-                        Text(error)
-                            .font(.callout)
-                            .foregroundColor(Color(red: 0.8, green: 0.1, blue: 0.1))
-                            .padding(.horizontal)
-                            .accessibilityLabel("Error: \(error)")
-                    }
-                }
-                .animation(.spring(), value: isHeaderVisible)
-                .padding(.horizontal)
-                .padding(.top, 16)
-                .padding(.bottom, 40)
-            }
-            .background(Color(white: 0.97).ignoresSafeArea())
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $showContactsView) {
-                ContactosView()
-            }
-        }
-        .onAppear {
-            store.onEntrySaved = { entries in
-                appState.update(from: entries)
-            }
-        }
-    }
-    
-    // MARK: - Selection handler
-    
-    private func handleSelection(question: BurnoutQuestion, index: Int, text: String) {
-        vm.selectedOptions[question.id] = (index: index, text: text)
-        
-        let weight = question.riskWeights?[safe: index] ?? 0
-        let recs = WellnessRecommendations.recommendations(
-            for: question.dimension,
-            riskWeight: weight
-        )
-        
-        if !recs.isEmpty {
-            activeRecommendations = recs
-            withAnimation(.spring(response: 0.4)) {
-                showRecommendationBanner = true
-            }
+        if showCompletionScreen {
+            CompletionView()
         } else {
-            withAnimation(.spring(response: 0.3)) {
-                showRecommendationBanner = false
+            NavigationStack {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        
+                        if isHeaderVisible {
+                            headerCard
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                        
+                        if vm.isLoading {
+                            loadingCard
+                        } else {
+                            ForEach(vm.activeQuestions) { question in
+                                questionCard(for: question)
+                            }
+                            submitButton
+                        }
+                        
+                        if let error = vm.errorMessage {
+                            Text(error)
+                                .font(.callout)
+                                .foregroundColor(Color(red: 0.8, green: 0.1, blue: 0.1))
+                                .padding(.horizontal)
+                        }
+                    }
+                    .animation(.spring(), value: isHeaderVisible)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                    .padding(.bottom, 40)
+                }
+                .background(Color(white: 0.97).ignoresSafeArea())
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationDestination(isPresented: $showContactsView) {
+                    ContactosView()
+                }
+            }
+            .onAppear {
+                store.onEntrySaved = { entries in
+                    appState.update(from: entries)
+                }
             }
         }
     }
+    
     
     // MARK: - Question card
     
@@ -99,15 +79,11 @@ struct QuestionnaireView: View {
             dimensionBadge(question.dimension)
             Text(question.text)
                 .font(.system(size: baseFontSize, weight: .semibold, design: .rounded))
-                // Alto contraste: casi negro sobre fondo claro
+            // Alto contraste: casi negro sobre fondo claro
                 .foregroundColor(Color(white: 0.12))
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
             inputView(for: question)
-            if showRecommendationBanner && !activeRecommendations.isEmpty {
-                recommendationBanner
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
         }
         .padding(cardPadding)
         .background(cardBackground)
@@ -142,7 +118,7 @@ struct QuestionnaireView: View {
             if (vm.textAnswers[question.id] ?? "").isEmpty {
                 Text("Escribe aquí...")
                     .font(.system(size: smallFontSize + 1))
-                    // Suficiente contraste para placeholder: ratio ~4.6:1
+                // Suficiente contraste para placeholder: ratio ~4.6:1
                     .foregroundColor(Color(white: 0.45))
                     .padding(EdgeInsets(top: 10, leading: 6, bottom: 0, trailing: 0))
                     .accessibilityHidden(true)
@@ -160,7 +136,7 @@ struct QuestionnaireView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                // Borde más visible: gris 50% en lugar de 20%
+            // Borde más visible: gris 50% en lugar de 20%
                 .stroke(Color(white: 0.5).opacity(0.4), lineWidth: 1.5)
         )
     }
@@ -173,7 +149,7 @@ struct QuestionnaireView: View {
                 let isSelected = vm.selectedOptions[question.id]?.index == index
                 
                 Button {
-                    handleSelection(question: question, index: index, text: option)
+                    vm.selectedOptions[question.id] = (index: index, text: option)
                 } label: {
                     HStack(spacing: emojiStyle ? 12 : 10) {
                         if emojiStyle {
@@ -184,11 +160,11 @@ struct QuestionnaireView: View {
                         } else {
                             Image(systemName: isSelected
                                   ? "checkmark.circle.fill" : "circle")
-                                // Naranja oscuro para contraste suficiente sobre blanco
-                                .foregroundColor(isSelected
-                                    ? Color(red: 0.75, green: 0.35, blue: 0.0)
-                                    : Color(white: 0.45))
-                                .font(.system(size: iconSize))
+                            // Naranja oscuro para contraste suficiente sobre blanco
+                            .foregroundColor(isSelected
+                                             ? Color(red: 0.75, green: 0.35, blue: 0.0)
+                                             : Color(white: 0.45))
+                            .font(.system(size: iconSize))
                             Text(option)
                                 .font(.system(size: smallFontSize + 1, design: .rounded))
                                 .foregroundColor(Color(white: 0.12))
@@ -227,10 +203,10 @@ struct QuestionnaireView: View {
                 let isSelected = vm.selectedOptions[question.id]?.index == index
                 
                 Button {
-                    handleSelection(question: question, index: index, text: emoji)
+                    vm.selectedOptions[question.id] = (index: index, text: emoji)
                 } label: {
                     Text(emoji)
-                        // Emoji más grande para facilitar el toque
+                    // Emoji más grande para facilitar el toque
                         .font(.system(size: 34))
                         .frame(maxWidth: .infinity)
                         .frame(minHeight: 54)
@@ -277,7 +253,7 @@ struct QuestionnaireView: View {
     
     private func dimensionStyle(_ d: BurnoutDimension) -> (String, Color, String) {
         switch d {
-        // Colores ajustados para contraste suficiente sobre sus fondos claros
+            // Colores ajustados para contraste suficiente sobre sus fondos claros
         case .cargaLaboral:         return ("Carga laboral",
                                             Color(red: 0.75, green: 0.35, blue: 0.0), "briefcase")
         case .agotamientoEmocional: return ("Agotamiento",
@@ -303,20 +279,8 @@ struct QuestionnaireView: View {
                     .font(.system(size: smallFontSize, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0.75, green: 0.35, blue: 0.0))
             }
-            ForEach(activeRecommendations.prefix(2), id: \.text) { rec in
-                HStack(alignment: .top, spacing: 8) {
-                    Text(rec.icon)
-                        .font(.system(size: baseFontSize))
-                        .accessibilityHidden(true)
-                    Text(rec.text)
-                        .font(.system(size: smallFontSize, design: .rounded))
-                        // Alto contraste: gris oscuro en lugar de .secondary
-                        .foregroundColor(Color(white: 0.25))
-                        .fixedSize(horizontal: false, vertical: true)
-                        .lineSpacing(3)
-                }
-            }
         }
+        
         .padding(14)
         .background(Color(red: 1.0, green: 0.95, blue: 0.87))
         .clipShape(RoundedRectangle(cornerRadius: 14))
@@ -368,11 +332,16 @@ struct QuestionnaireView: View {
     
     private var submitButton: some View {
         Button {
-            Task { await vm.submitAndGenerate() }
+            Task {
+                await vm.submitAndGenerate()
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    showCompletionScreen = true
+                }
+            }
         } label: {
             Group {
-                if vm.isSaved {
-                    Label("¡Guardado!", systemImage: "checkmark.seal")
+                if vm.isLoading {
+                    ProgressView().tint(.white)
                 } else {
                     Text("Enviar respuestas")
                 }
@@ -393,8 +362,8 @@ struct QuestionnaireView: View {
             )
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .disabled(!vm.canSubmit)
-        .accessibilityLabel(vm.isSaved ? "Respuestas guardadas" : "Enviar respuestas")
+        .disabled(!vm.canSubmit || vm.isLoading)
+        .accessibilityLabel("Enviar respuestas")
         .accessibilityHint(vm.canSubmit ? "" : "Responde al menos una pregunta para continuar")
     }
     
@@ -421,8 +390,8 @@ struct QuestionnaireView: View {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
-    }
-}
+        
+    }}
 
 #Preview {
     QuestionnaireView()

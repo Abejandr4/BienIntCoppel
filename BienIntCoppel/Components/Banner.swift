@@ -38,6 +38,7 @@ struct Banner: View {
             }
             
             Button(action: { showQuestionnaire = true }) {
+                Spacer()
                 Text("Comenzar")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
@@ -45,6 +46,7 @@ struct Banner: View {
                     .padding(.vertical, 12)
                     .background(Color.indigo.opacity(opacityLevel + 0.2))
                     .cornerRadius(14)
+                Spacer()
             }
         }
         .padding(24)
