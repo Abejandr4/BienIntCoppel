@@ -58,7 +58,10 @@ struct MentalWellnessView: View {
                     // 3. Questionnaire
                     QuestionnaireView()
                     
-                    // 4. Mental Exercises
+                    // 4. Recommended Exercises
+                    RecommendedExerciseView(scoresCuestionario: 50)
+                    
+                    // 5. Mental Exercises
                     MentalExercisesView()
                     
                     // MARK: - Progress Notice
