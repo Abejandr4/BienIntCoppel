@@ -9,7 +9,7 @@ struct MentalWellnessView: View {
                 // MARK: - Header
                 ZStack {
                     LinearGradient(
-                        colors: [Color.green.opacity(0.8), Color.green.opacity(0.4), Color.orange.opacity(0.4)],
+                        colors: [Color.green.opacity(0.9), Color.green.opacity(0.5), Color.orange.opacity(0.7)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -17,23 +17,24 @@ struct MentalWellnessView: View {
                     
                     VStack(alignment: .leading, spacing: 15) {
                         HStack(spacing: 12) {
-                            
-                            
-                            
-                            HStack {
-                                Image(systemName: "brain.head.profile")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 30))
-                                VStack(alignment: .leading) {
-                                    Text("Bienestar Mental")
-                                        .font(.title)
+                                // Envolvemos el contenido en otro HStack y añadimos un Spacer
+                                HStack(spacing: 12) {
+                                    Image(systemName: "brain.head.profile")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 30))
+                                        .padding(.horizontal, 20)
                                     
-                                                                    .fontWeight(.bold)
-                                                                    .foregroundColor(.white)
+                                    VStack(alignment: .leading) {
+                                        Text("Bienestar Mental")
+                                            .font(.title)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal,-20)
+                                    }
                                 }
                                 
-                            }
-                            .padding(.horizontal, 20)
+                            Spacer()
+                            
                         }
                         .padding(.top, 80)
                         
