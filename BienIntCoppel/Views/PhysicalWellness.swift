@@ -27,7 +27,7 @@ struct ChallengeItem: Identifiable {
     let id = UUID()
     let title: String
     let desc: String
-    let emoji: String
+    let iconName: String // Cambiado de emoji a iconName
 }
 
 // MARK: - Main View
@@ -84,12 +84,13 @@ struct PhysicalWellnessView: View {
         QuickAccessItem(title: "Llamar a Coppel Contigo", desc: "Orientación telefónica especializada, ocupas ambulancia o algún apoyo económico.", iconName: "phone.fill", color: .green, bgColor: .green.opacity(0.15))
     ]
     
+    // Cambiamos los emojis por SF Symbols acordes a cada reto
     private let challenges = [
-        ChallengeItem(title: "Entrenamientos 2026", desc: "Todos los entrenamientos 2026", emoji: "🏃"),
-        ChallengeItem(title: "Actívate 10,000 pasos", desc: "Realizar 10,000 pasos al día durante un mes.", emoji: "🚶"),
-        ChallengeItem(title: "Reto de Actividad Física 2026", desc: "¡Actívate y súmate al reto!", emoji: "💪"),
-        ChallengeItem(title: "Camina tu maratón 2026", desc: "Camina, corre o usa la caminadora. Recorre de manera individual 42,195 metros.", emoji: "🏅"),
-        ChallengeItem(title: "Reto Actívate en Familia 2026", desc: "El colaborador deberán realizar una rutina de ejercicios: 10 minutos de calentamiento, 10 minutos aeróbico y 10 minutos de fuerza.", emoji: "👨‍👩‍👧")
+        ChallengeItem(title: "Entrenamientos 2026", desc: "Todos los entrenamientos 2026", iconName: "figure.run"),
+        ChallengeItem(title: "Actívate 10,000 pasos", desc: "Realizar 10,000 pasos al día durante un mes.", iconName: "figure.walk"),
+        ChallengeItem(title: "Reto de Actividad Física 2026", desc: "¡Actívate y súmate al reto!", iconName: "bolt.fill"),
+        ChallengeItem(title: "Camina tu maratón 2026", desc: "Camina, corre o usa la caminadora. Recorre de manera individual 42,195 metros.", iconName: "medal.fill"),
+        ChallengeItem(title: "Reto Actívate en Familia 2026", desc: "El colaborador deberán realizar una rutina de ejercicios: 10 minutos de calentamiento, 10 minutos aeróbico y 10 minutos de fuerza.", iconName: "person.3.fill")
     ]
     
     // MARK: - Body
@@ -111,7 +112,7 @@ struct PhysicalWellnessView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
-                    .padding(.bottom, 40) // Reduje el padding porque ya no hay pop-up flotando
+                    .padding(.bottom, 40)
                 }
             }
             .edgesIgnoringSafeArea(.top)
@@ -136,9 +137,10 @@ struct PhysicalWellnessView: View {
                 HStack {
                     Image(systemName: "waveform.path.ecg")
                         .foregroundColor(.white)
+                        .font(.system(size: 30))
                     VStack(alignment: .leading) {
                         Text("Bienestar Físico")
-                            .font(.title3)
+                            .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                         Text("Tu actividad y salud")
@@ -148,7 +150,7 @@ struct PhysicalWellnessView: View {
                 }
                 Spacer()
             }
-            .padding(.top, 60)
+            .padding(.top, 80)
             .padding(.horizontal, 20)
         }
         .padding(.bottom, 24)
@@ -317,7 +319,10 @@ struct PhysicalWellnessView: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(Color.orange.opacity(0.1))
                                 .frame(width: 48, height: 48)
-                            Text(item.emoji)
+                            
+                            // Usamos Image con el SF Symbol en lugar de Text con el emoji
+                            Image(systemName: item.iconName)
+                                .foregroundColor(.orange)
                                 .font(.system(size: 24))
                         }
                         
@@ -346,56 +351,62 @@ struct PhysicalWellnessView: View {
     }
     
     private var echaleKilosBanner: some View {
-        GeometryReader { geometry in
-            ZStack {
-                LinearGradient(colors: [Color.blue.opacity(0.9), Color.blue], startPoint: .leading, endPoint: .trailing)
+            GeometryReader { geometry in
                 
-                HStack {
-                    Spacer()
-                    LinearGradient(colors: [Color.green.opacity(0.3), Color.clear], startPoint: .leading, endPoint: .trailing)
-                        .frame(width: geometry.size.width / 2)
-                }
+                // Definimos los colores institucionales de Coppel
+                let coppelBlue = Color(red: 0 / 255, green: 93 / 255, blue: 170 / 255)
+                let coppelLightBlue = Color(red: 0 / 255, green: 125 / 255, blue: 205 / 255)
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("ÉCHALE LOS KILOS ••• COPPEL")
-                        .font(.system(size: 10, weight: .medium, design: .default))
-                        .tracking(1.5)
-                        .foregroundColor(.white.opacity(0.8))
+                ZStack {
+                    // Fondo con el degradado del azul Coppel
+                    LinearGradient(
+                        colors: [coppelLightBlue, coppelBlue],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
                     
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("¡El poder")
-                        Text("está en ti!")
-                            .foregroundColor(.yellow)
-                    }
-                    .font(.title)
-                    .fontWeight(.black)
-                    .foregroundColor(.white)
                     
-                    Text("Inscríbete hoy al programa **Échale los Kilos** y da el primer paso.")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.8))
-                        .frame(maxWidth: 200, alignment: .leading)
-                    
-                    Button(action: {}) {
-                        Text("¿Te atreves?")
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("ÉCHALE LOS KILOS ••• COPPEL")
+                            .font(.system(size: 10, weight: .medium, design: .default))
+                            .tracking(1.5)
+                            .foregroundColor(.white.opacity(0.8))
+                        
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("¡El poder")
+                            Text("está en ti!")
+                                .foregroundColor(.yellow)
+                        }
+                        .font(.title)
+                        .fontWeight(.black)
+                        .foregroundColor(.white)
+                        
+                        Text("Inscríbete hoy al programa **Échale los Kilos** y da el primer paso.")
                             .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.blue.opacity(0.8))
-                            .overlay(Capsule().stroke(Color.blue.opacity(0.4), lineWidth: 1))
-                            .clipShape(Capsule())
+                            .foregroundColor(.white.opacity(0.9))
+                            .frame(maxWidth: 200, alignment: .leading)
+                        
+                        Button(action: {}) {
+                            Text("¿Te atreves?")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                // Usamos el azul fuerte para el botón para que contraste
+                                .background(coppelBlue.opacity(0.8))
+                                .overlay(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1))
+                                .clipShape(Capsule())
+                        }
+                        .padding(.top, 4)
                     }
-                    .padding(.top, 4)
+                    .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(20)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .cornerRadius(16)
             }
-            .cornerRadius(16)
+            .frame(height: 176)
         }
-        .frame(height: 176)
-    }
 }
 
 // MARK: - Preview

@@ -30,17 +30,19 @@ struct MentalWellnessView: View {
                             HStack {
                                 Image(systemName: "brain.head.profile")
                                     .foregroundColor(.white)
+                                    .font(.system(size: 30))
                                 VStack(alignment: .leading) {
                                     Text("Bienestar Mental")
-                                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
+                                        .font(.title)
+                                                                    .fontWeight(.bold)
+                                                                    .foregroundColor(.white)
                                     Text("Fase 1 — Identificación")
                                         .font(.system(size: 12))
                                         .foregroundColor(.white.opacity(0.8))
                                 }
                             }
                         }
-                        .padding(.top, 60)
+                        .padding(.top, 80)
                         .padding(.horizontal)
                     }
                     .padding(.bottom, 25)
