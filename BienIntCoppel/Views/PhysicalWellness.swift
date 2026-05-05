@@ -69,7 +69,7 @@ struct PhysicalWellnessView: View {
     private let activityStats = [
         ActivityStat(label: "Tiempo", value: "36 Min", iconName: "clock"),
         ActivityStat(label: "Distancia", value: "0.00 Km", iconName: "mappin.and.ellipse"),
-        ActivityStat(label: "Pasos", value: "2,053", iconName: "shoeprints.fill")
+        ActivityStat(label: "Pasos", value: "2,053", iconName: "shoe")
     ]
     
     private let trainingStats = [
@@ -80,18 +80,18 @@ struct PhysicalWellnessView: View {
     ]
     
     private let quickAccess = [
-        QuickAccessItem(title: "Tu actividad", desc: "Visualiza tu historial de entrenamientos y objetivos cumplidos.", iconName: "dumbbell.fill", color: .orange, bgColor: .orange.opacity(0.15)),
-        QuickAccessItem(title: "Peso y altura", desc: "Registra tu peso y altura para el cálculo de calorías.", iconName: "scalemass.fill", color: .green, bgColor: .green.opacity(0.15)),
-        QuickAccessItem(title: "Coppel Contigo", desc: "Orientación telefónica especializada, ocupas ambulancia o algún apoyo económico.", iconName: "heart.fill", color: .orange, bgColor: .orange.opacity(0.15)),
-        QuickAccessItem(title: "Llamar a Coppel Contigo", desc: "Orientación telefónica especializada, ocupas ambulancia o algún apoyo económico.", iconName: "phone.fill", color: .green, bgColor: .green.opacity(0.15))
+        QuickAccessItem(title: "Tu actividad", desc: "Visualiza tu historial de entrenamientos y objetivos cumplidos.", iconName: "dumbbell", color: .orange, bgColor: .orange.opacity(0.15)),
+        QuickAccessItem(title: "Peso y altura", desc: "Registra tu peso y altura para el cálculo de calorías.", iconName: "scalemass", color: .green, bgColor: .green.opacity(0.15)),
+        QuickAccessItem(title: "Coppel Contigo", desc: "Orientación telefónica especializada, ocupas ambulancia o algún apoyo económico.", iconName: "heart", color: .orange, bgColor: .orange.opacity(0.15)),
+        QuickAccessItem(title: "Llamar a Coppel Contigo", desc: "Orientación telefónica especializada, ocupas ambulancia o algún apoyo económico.", iconName: "phone", color: .green, bgColor: .green.opacity(0.15))
     ]
     
     private let challenges = [
         ChallengeItem(title: "Entrenamientos 2026", desc: "Todos los entrenamientos 2026", iconName: "figure.run"),
         ChallengeItem(title: "Actívate 10,000 pasos", desc: "Realizar 10,000 pasos al día durante un mes.", iconName: "figure.walk"),
-        ChallengeItem(title: "Reto de Actividad Física 2026", desc: "¡Actívate y súmate al reto!", iconName: "bolt.fill"),
-        ChallengeItem(title: "Camina tu maratón 2026", desc: "Camina, corre o usa la caminadora. Recorre de manera individual 42,195 metros.", iconName: "medal.fill"),
-        ChallengeItem(title: "Reto Actívate en Familia 2026", desc: "El colaborador deberán realizar una rutina de ejercicios: 10 minutos de calentamiento, 10 minutos aeróbico y 10 minutos de fuerza.", iconName: "person.3.fill")
+        ChallengeItem(title: "Reto de Actividad Física 2026", desc: "¡Actívate y súmate al reto!", iconName: "bolt"),
+        ChallengeItem(title: "Camina tu maratón 2026", desc: "Camina, corre o usa la caminadora. Recorre de manera individual 42,195 metros.", iconName: "medal"),
+        ChallengeItem(title: "Reto Actívate en Familia 2026", desc: "El colaborador deberán realizar una rutina de ejercicios: 10 minutos de calentamiento, 10 minutos aeróbico y 10 minutos de fuerza.", iconName: "person.3")
     ]
     
     // MARK: - Body
