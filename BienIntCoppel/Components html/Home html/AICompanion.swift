@@ -1,12 +1,5 @@
 import SwiftUI
 
-// 1. Data Model
-struct Message: Identifiable, Equatable {
-    let id = UUID()
-    let role: MessageRole
-    let content: String
-}
-
 enum MessageRole {
     case user
     case assistant
