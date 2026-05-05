@@ -105,10 +105,7 @@ struct MainView: View {
 
 // MARK: - Contenedor Principal de la Tarjeta Animada
 struct AnimatedParticleCard: View {
-    @EnvironmentObject var appState: AppState
-    @State private var showQuestionnaire = false
-    
-    let animatedImages = ["Coppelia1", "Coppelia2", "Coppelia3", "Coppelia4", "Coppelia5"]
+    let animatedImages = ["Coppelia5", "Coppelia4", "Coppelia2", "Coppelia1", "Coppelia3", "Coppelia1", "Coppelia2", "Coppelia4"]
     
     // Mensajes mixtos: tips de bienestar + normalización de salud mental
     let thoughts = [
@@ -123,8 +120,14 @@ struct AnimatedParticleCard: View {
         "Sonríe, te ves increíble hoy"
     ]
     
-    @State private var currentIndex = 0
-    
+    @State private var currentIndex = 0  // Coppelia — rápido
+    @State private var thoughtIndex = 0  // Mensajes — lento
+
+    // Timer para Coppelia (rápido)
+    let imageTimer = Timer.publish(every: 2.0, on: .main, in: .common).autoconnect()
+    // Timer para mensajes (lento)
+    let thoughtTimer = Timer.publish(every: 9.0, on: .main, in: .common).autoconnect()
+
     var body: some View {
         VStack(spacing: 12) {
             // Tarjeta con animación + nube
@@ -140,30 +143,38 @@ struct AnimatedParticleCard: View {
                     )
                     .frame(width: 180, height: 180)
                     
-                    ThoughtBubbleView(text: thoughts[currentIndex % thoughts.count])
+                    ThoughtBubbleView(text: thoughts[thoughtIndex % thoughts.count])
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, 16)
-                
             }
             .frame(height: 240)
             .cornerRadius(20)
             .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-            
+            // Los dos timers se reciben aquí, cada uno controla su propio índice
+            .onReceive(imageTimer) { _ in
+                withAnimation {
+                    currentIndex = (currentIndex + 1) % animatedImages.count
+                }
+            }
+            .onReceive(thoughtTimer) { _ in
+                thoughtIndex = (thoughtIndex + 1) % thoughts.count
+            }
+
             // Botón debajo de la nube → navega al cuestionario
-            Button(action: { showQuestionnaire = true }) {
+            NavigationLink(destination: QuestionnaireView()) {
                 HStack(spacing: 8) {
                     Image(systemName: "heart.text.square")
                         .font(.system(size: 24, weight: .semibold))
-                        Text("¿Cómo te sientes hoy?")
-                            .font(.custom("Poppins-SemiBold", size: 16))
-                        
-                        Spacer()
-                        
-                        Image(systemName: "arrow.right")
-                    }
+                    
+                    Text("¿Cómo te sientes hoy?")
+                        .font(.custom("Poppins-SemiBold", size: 16))
+                    
+                    Spacer()
+                    
+                    Image(systemName: "arrow.right")
                         .font(.system(size: 14, weight: .bold))
-                
+                }
                 .foregroundColor(.white)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 14)
@@ -171,8 +182,8 @@ struct AnimatedParticleCard: View {
                 .background(
                     LinearGradient(
                         colors: [
-                            Color(red: 0.62, green: 0.55, blue: 0.85),  // lila (color de la nube)
-                            Color(red: 0.50, green: 0.45, blue: 0.78)   // lila más profundo
+                            Color(red: 0.62, green: 0.55, blue: 0.85),
+                            Color(red: 0.50, green: 0.45, blue: 0.78)
                         ],
                         startPoint: .leading,
                         endPoint: .trailing
@@ -183,11 +194,6 @@ struct AnimatedParticleCard: View {
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .sheet(isPresented: $showQuestionnaire) {
-            QuestionnaireView()
-                .environmentObject(appState)
-        }
-        
     }
 }
 
@@ -213,13 +219,11 @@ struct ThoughtBubbleView: View {
     }
     
     var body: some View {
-        // ZStack para poder posicionar las burbujitas en diagonal
         ZStack(alignment: .topLeading) {
             
-            // 👇 BURBUJITAS DE PENSAMIENTO (ajusta su posición global aquí)
+            // BURBUJITAS DE PENSAMIENTO
             ThoughtTrail(accentColor: accentColor)
                 .offset(x: -8, y: 85)
-            // ⬅️ MUEVE TODA la trayectoria: x = horizontal, y = vertical
             
             // Nube principal
             HStack(alignment: .firstTextBaseline, spacing: 4) {
@@ -253,7 +257,7 @@ struct ThoughtBubbleView: View {
                     .shadow(color: accentColor.opacity(0.12), radius: 8, x: 0, y: 3)
                     .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: 1)
             )
-            .padding(.leading, 22) // Espacio reservado para que se vean las burbujitas a la izquierda
+            .padding(.leading, 22)
         }
         .opacity(appear ? 1 : 0)
         .scaleEffect(appear ? 1 : 0.85, anchor: .bottomLeading)
@@ -275,14 +279,16 @@ struct ThoughtBubbleView: View {
         displayedText = ""
         
         typingTask = Task {
-            try? await Task.sleep(nanoseconds: 350_000_000)
+            // Pausa inicial antes de empezar a escribir
+            try? await Task.sleep(nanoseconds: 500_000_000)
             
             for character in splitText.body {
                 if Task.isCancelled { return }
                 await MainActor.run {
                     displayedText.append(character)
                 }
-                let delay: UInt64 = (character == "," || character == ".") ? 250_000_000 : 80_000_000
+                // Más lento entre letras; pausa extra en puntuación
+                let delay: UInt64 = (character == "," || character == ".") ? 400_000_000 : 65_000_000
                 try? await Task.sleep(nanoseconds: delay)
             }
         }
@@ -294,7 +300,7 @@ struct ThoughtBubbleView: View {
         }
         
         Task {
-            try? await Task.sleep(nanoseconds: 300_000_000)
+            try? await Task.sleep(nanoseconds: 500_000_000)
             await MainActor.run {
                 startTyping()
             }
@@ -309,29 +315,28 @@ struct ThoughtTrail: View {
     
     var body: some View {
         ZStack {
-
             Circle()
                 .fill(Color.white)
                 .overlay(Circle().stroke(accentColor.opacity(0.2), lineWidth: 0.5))
                 .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 1)
-                .frame(width: 6, height: 6)        // ⬅️ TAMAÑO burbuja 1
-                .offset(x: -30, y: -40)                // ⬅️ POSICIÓN burbuja 1
+                .frame(width: 6, height: 6)
+                .offset(x: -30, y: -40)
                 .opacity(pulse ? 1.0 : 0.7)
             
             Circle()
                 .fill(Color.white)
                 .overlay(Circle().stroke(accentColor.opacity(0.2), lineWidth: 0.5))
                 .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 1)
-                .frame(width: 10, height: 10)      // ⬅️ TAMAÑO burbuja 2
-                .offset(x: -10, y: -50)             // ⬅️ POSICIÓN burbuja 2 (10 a la derecha, 14 arriba)
+                .frame(width: 10, height: 10)
+                .offset(x: -10, y: -50)
                 .opacity(pulse ? 0.85 : 1.0)
            
             Circle()
                 .fill(Color.white)
                 .overlay(Circle().stroke(accentColor.opacity(0.2), lineWidth: 0.5))
                 .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 1)
-                .frame(width: 14, height: 14)      // ⬅️ TAMAÑO burbuja 3
-                .offset(x: 10, y: -60)             // ⬅️ POSICIÓN burbuja 3 (24 a la derecha, 30 arriba)
+                .frame(width: 14, height: 14)
+                .offset(x: 10, y: -60)
                 .opacity(pulse ? 1.0 : 0.8)
         }
         .animation(
@@ -349,33 +354,27 @@ struct OrganicBubbleShape: Shape {
         let w = rect.width
         let h = rect.height
         
-        // Radios ligeramente diferentes en cada esquina para un look orgánico
         let topLeft: CGFloat = 18
         let topRight: CGFloat = 22
         let bottomRight: CGFloat = 20
         let bottomLeft: CGFloat = 14
         
-        // Top-left
         path.move(to: CGPoint(x: topLeft, y: 0))
-        // Top edge
         path.addLine(to: CGPoint(x: w - topRight, y: 0))
         path.addQuadCurve(
             to: CGPoint(x: w, y: topRight),
             control: CGPoint(x: w, y: 0)
         )
-        // Right edge
         path.addLine(to: CGPoint(x: w, y: h - bottomRight))
         path.addQuadCurve(
             to: CGPoint(x: w - bottomRight, y: h),
             control: CGPoint(x: w, y: h)
         )
-        // Bottom edge
         path.addLine(to: CGPoint(x: bottomLeft, y: h))
         path.addQuadCurve(
             to: CGPoint(x: 0, y: h - bottomLeft),
             control: CGPoint(x: 0, y: h)
         )
-        // Left edge
         path.addLine(to: CGPoint(x: 0, y: topLeft))
         path.addQuadCurve(
             to: CGPoint(x: topLeft, y: 0),
@@ -432,12 +431,11 @@ struct ParticleBackgroundView: View {
     }
 }
 
-// MARK: - COMPONENTE 2: Animación de Imágenes (sincronizada con el padre)
+// MARK: - COMPONENTE 2: Animación de Imágenes
+// El timer fue removido de aquí — ahora AnimatedParticleCard lo maneja
 struct SmoothImageSequenceView: View {
     let images: [String]
     @Binding var currentIndex: Int
-    
-    let timer = Timer.publish(every: 2.0, on: .main, in: .common).autoconnect()
     
     var body: some View {
         ZStack {
@@ -446,12 +444,7 @@ struct SmoothImageSequenceView: View {
                     .resizable()
                     .scaledToFit()
                     .opacity(currentIndex == index ? 1.0 : 0.0)
-                    .animation(.easeInOut(duration: 1), value: currentIndex)
-            }
-        }
-        .onReceive(timer) { _ in
-            withAnimation {
-                currentIndex = (currentIndex + 1) % images.count
+                    .animation(.easeInOut(duration: 0.6), value: currentIndex)
             }
         }
     }
@@ -578,7 +571,6 @@ struct HeaderView: View {
                 }
                 
                 Spacer()
-                
             }
             .padding(.horizontal, 25)
             .padding(.bottom, 25)
@@ -588,5 +580,4 @@ struct HeaderView: View {
 
 #Preview {
     MainView()
-        .environmentObject(AppState())
 }
