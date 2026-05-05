@@ -6,6 +6,7 @@ enum QuestionType: String, Codable, CaseIterable {
     case openText           // Respuesta de texto libre
     case multipleChoiceText // Opciones de texto largas
     case multipleChoiceEmoji // Opciones con emoji y/o número
+    case emojiOnly
 }
 
 enum BurnoutDimension: String, Codable, CaseIterable {
@@ -93,6 +94,42 @@ struct QuestionBank {
             text: "¿Cuántos clientes con reclamos o situaciones difíciles atendiste hoy?",
             options: ["0️⃣ Ninguno", "1️⃣–2️⃣ Uno o dos", "3️⃣–5️⃣ Tres a cinco", "6️⃣+ Seis o más"],
             riskWeights: [0, 1, 2, 3]
+        ),
+        BurnoutQuestion(
+            dimension: .cargaLaboral,
+            type: .emojiOnly,
+            text: "¿Con qué emoji describirías tu jornada de hoy?",
+            options: ["😤", "😩", "😐", "🙂", "💪"],
+            riskWeights: [2, 3, 1, 0, 0]
+        ),
+
+        BurnoutQuestion(
+            dimension: .agotamientoEmocional,
+            type: .emojiOnly,
+            text: "¿Cómo está tu batería emocional ahora mismo?",
+            options: ["🪫", "😮‍💨", "😐", "🔋", "⚡"],
+            riskWeights: [3, 2, 1, 0, 0]
+        ),
+        BurnoutQuestion(
+            dimension: .despersonalizacion,
+            type: .emojiOnly,
+            text: "¿Cómo te sentiste con los clientes hoy?",
+            options: ["😠", "😶", "🙂", "😊", "🤝"],
+            riskWeights: [3, 2, 1, 0, 0]
+        ),
+        BurnoutQuestion(
+            dimension: .realizacionPersonal,
+            type: .emojiOnly,
+            text: "¿Cómo calificarías tu día en Coppel con un solo emoji?",
+            options: ["💀", "😞", "😐", "😊", "🌟"],
+            riskWeights: [3, 2, 1, 0, 0]
+        ),
+        BurnoutQuestion(
+            dimension: .indicadoresFisicos,
+            type: .emojiOnly,
+            text: "¿Cómo está tu cuerpo en este momento?",
+            options: ["🤕", "😣", "😐", "🙂", "💪"],
+            riskWeights: [3, 2, 1, 0, 0]
         ),
         
         BurnoutQuestion(

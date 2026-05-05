@@ -24,15 +24,13 @@ struct QuestionnaireView: View {
                             .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                     
-                    submitButton
-                    
                     if vm.isLoading {
                         loadingCard
                     } else {
                         ForEach(vm.activeQuestions) { question in
                             questionCard(for: question)
                         }
-                        
+                        submitButton
                     }
                     
                     if store.riskLevel.shouldShowAlert {
@@ -80,6 +78,8 @@ struct QuestionnaireView: View {
                 multipleChoiceList(for: question, emojiStyle: false)
             case .multipleChoiceEmoji:
                 multipleChoiceList(for: question, emojiStyle: true)
+            case .emojiOnly:
+                emojiOnlyPicker(for: question)
             }
         }
         .padding(20)
@@ -156,6 +156,39 @@ struct QuestionnaireView: View {
                                     ? Color.orange.opacity(0.4)
                                     : Color.gray.opacity(0.15), lineWidth: 1)
                     )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func emojiOnlyPicker(for question: BurnoutQuestion) -> some View {
+        HStack(spacing: 8) {
+            ForEach(Array((question.options ?? []).enumerated()), id: \.offset) { index, emoji in
+                let isSelected = vm.selectedOptions[question.id]?.index == index
+                
+                Button {
+                    vm.selectedOptions[question.id] = (index: index, text: emoji)
+                } label: {
+                    Text(emoji)
+                        .font(.system(size: 32))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(isSelected
+                                      ? Color.orange.opacity(0.12)
+                                      : Color.white.opacity(0.6))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(isSelected
+                                        ? Color.orange.opacity(0.5)
+                                        : Color.clear, lineWidth: 2)
+                        )
+                        .scaleEffect(isSelected ? 1.12 : 1.0)
+                        .animation(.spring(response: 0.25), value: isSelected)
                 }
                 .buttonStyle(.plain)
             }

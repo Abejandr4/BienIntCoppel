@@ -76,8 +76,8 @@ class QuestionnaireViewModel: ObservableObject {
         // Preferir dimensiones no vistas recientemente
         let candidates = all.filter { !recent.contains($0) && !excluded.contains($0) }
         let pool = candidates.isEmpty
-            ? all.filter { !excluded.contains($0) }
-            : candidates
+        ? all.filter { !excluded.contains($0) }
+        : candidates
         
         // Puntuar cada dimensión según riesgo acumulado en entradas recientes
         let riskScores = dimensionRiskScores()
@@ -117,8 +117,8 @@ class QuestionnaireViewModel: ObservableObject {
         let candidates = fresh.isEmpty ? pool : fresh
         
         return candidates.first(where: { $0.type == preferredType })
-            ?? candidates.randomElement()
-            ?? pool[0]
+        ?? candidates.randomElement()
+        ?? pool[0]
     }
     
     // MARK: - Enviar respuestas
@@ -162,9 +162,9 @@ class QuestionnaireViewModel: ObservableObject {
                     riskWeight: 0
                 ))
                 
-            case .multipleChoiceText, .multipleChoiceEmoji:
+            case .multipleChoiceText, .multipleChoiceEmoji, .emojiOnly:
                 if let selection = selectedOptions[question.id] {
-                    let weight = question.riskWeights?[safe: selection.index] ?? 0
+                    let weight = question.riskWeights?[selection.index] ?? 0
                     result.append(QuestionResponse(
                         questionText: question.text,
                         questionType: question.type,
@@ -218,42 +218,42 @@ class QuestionnaireViewModel: ObservableObject {
     private func generateWithAI() async {
         guard let session else { loadNextQuestions(); return }
         
-        let context = store.entries.suffix(5).flatMap { $0.responses }.map {
-            "[\($0.dimension.rawValue)] \($0.questionText): \($0.textAnswer ?? $0.selectedOption ?? "sin respuesta") (peso: \($0.riskWeight))"
-        }.joined(separator: "\n")
+        // Construir contexto para el tool
+        let recentResponses = store.entries.suffix(5).flatMap(\.responses)
         
-        let weights = store.selectionWeights()
-        let typeHint = weights.max(by: { $0.value < $1.value })?.key.rawValue ?? "multipleChoiceEmoji"
+        let dimensionSummary = Dictionary(grouping: recentResponses, by: \.dimension)
+            .mapValues { responses in responses.map(\.riskWeight).reduce(0, +) }
+            .sorted { $0.value > $1.value }
+            .map { "\($0.key.rawValue): \($0.value)pts" }
+            .joined(separator: ", ")
         
+        let preferredType = store.selectionWeights()
+            .max(by: { $0.value < $1.value })?.key.rawValue ?? "multipleChoiceEmoji"
+        
+        let recentDims = recentDimensions.suffix(4)
+            .map(\.rawValue)
+            .joined(separator: ", ")
+        
+        let contexto = """
+            Dimensiones por nivel de riesgo acumulado: \(dimensionSummary.isEmpty ? "sin datos aún" : dimensionSummary).
+            Respuestas recientes de texto: \(recentResponses.compactMap(\.textAnswer).suffix(3).joined(separator: " | ")).
+            """
+        
+        // Prompt que instruye al modelo a llamar al tool
         let prompt = """
-        Eres un asistente especializado en detección de burnout laboral en empleados de Coppel.
-        Genera exactamente 2 preguntas nuevas en español, en JSON, sin texto adicional.
-        
-        Historial reciente:
-        \(context)
-        
-        El usuario prefiere preguntas de tipo "\(typeHint)".
-        
-        Tipos válidos: "openText", "multipleChoiceText", "multipleChoiceEmoji"
-        Dimensiones válidas: "cargaLaboral", "agotamientoEmocional", "despersonalizacion", "realizacionPersonal", "indicadoresFisicos"
-        
-        Formato:
-        [
-          {
-            "dimension": "<dimensión>",
-            "type": "<tipo>",
-            "text": "<pregunta>",
-            "options": ["<op1>","<op2>","<op3>","<op4>"] // null si openText
-          },
-          { ... }
-        ]
-        Las opciones deben ir de mejor (índice 0) a peor estado (índice 3).
-        Si el tipo es "multipleChoiceEmoji", cada opción debe comenzar con un emoji relevante.
-        """
+            Usa la herramienta generateQuestions para generar el siguiente par de preguntas.
+            
+            Contexto: \(contexto)
+            Tipo preferido: \(preferredType)
+            Dimensiones recientes a evitar: \(recentDims.isEmpty ? "ninguna" : recentDims)
+            """
         
         do {
             let response = try await session.respond(to: prompt)
-            if !parseAIQuestions(json: response.content) {
+            
+            // Buscar el resultado estructurado en el contenido de la respuesta
+            // Foundation Models devuelve el texto; parseamos el JSON del tool use
+            if !parseAIQuestions(from: response.content) {
                 loadNextQuestions()
             }
         } catch {
@@ -261,31 +261,50 @@ class QuestionnaireViewModel: ObservableObject {
         }
     }
     
-    @discardableResult
-    private func parseAIQuestions(json: String) -> Bool {
-        // Limpiar posibles bloques de código markdown
-        let clean = json
+    // Convierte AIGeneratedQuestion → BurnoutQuestion
+    private func parseAIQuestions(from content: String) -> Bool {
+        // Limpiar posibles bloques markdown
+        let clean = content
             .replacingOccurrences(of: "```json", with: "")
             .replacingOccurrences(of: "```", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         
         guard let data = clean.data(using: .utf8),
-              let arr = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-              arr.count == 2
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else { return false }
+        
+        // Intentar parsear como par { first: {}, second: {} }
+        // o como array [ {}, {} ] (fallback)
+        let rawQuestions: [[String: Any]]
+        if let first = obj["first"] as? [String: Any],
+           let second = obj["second"] as? [String: Any] {
+            rawQuestions = [first, second]
+        } else if let arr = try? JSONSerialization.jsonObject(
+            with: clean.data(using: .utf8)!) as? [[String: Any]], arr.count == 2 {
+            rawQuestions = arr
+        } else {
+            return false
+        }
         
         var parsed: [BurnoutQuestion] = []
         
-        for obj in arr {
-            guard let dimRaw = obj["dimension"] as? String,
-                  let typeRaw = obj["type"] as? String,
-                  let text = obj["text"] as? String,
+        for raw in rawQuestions {
+            guard let dimRaw  = raw["dimension"] as? String,
+                  let typeRaw = raw["type"] as? String,
+                  let text    = raw["text"] as? String,
                   let dimension = BurnoutDimension(rawValue: dimRaw),
-                  let qType = QuestionType(rawValue: typeRaw)
+                  let qType   = QuestionType(rawValue: typeRaw)
             else { return false }
             
-            let options = obj["options"] as? [String]
-            let weights = qType == .openText ? nil : [0, 1, 2, 3]
+            let options = (raw["options"] as? [String])?.filter { !$0.isEmpty }
+            let weights: [Int]? = {
+                guard qType != .openText else { return nil }
+                let count = options?.count ?? 0
+                // Escala lineal 0…3 normalizada al número de opciones
+                return (0..<count).map { i in
+                    count > 1 ? Int(Double(i) / Double(count - 1) * 3.0) : 0
+                }
+            }()
             
             parsed.append(BurnoutQuestion(
                 dimension: dimension,
@@ -296,15 +315,16 @@ class QuestionnaireViewModel: ObservableObject {
             ))
         }
         
+        guard parsed.count == 2 else { return false }
+        
         activeQuestions = parsed
         textAnswers = [:]
         selectedOptions = [:]
         isSaved = false
         return true
     }
+    
 }
-
-
 // MARK: - Array safe subscript
 
 extension Array {
