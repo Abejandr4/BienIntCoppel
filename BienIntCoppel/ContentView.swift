@@ -66,6 +66,10 @@ struct ContentView: View {
                 }
                 .accentColor(.orange)// Matches the highlight color in your image
             }
+<<<<<<< HEAD
+=======
+            .accentColor(.orange)
+>>>>>>> 1fd9dd6979832e4ad75a4cb91cb90ca58e73ec3b
         }
     }
         
