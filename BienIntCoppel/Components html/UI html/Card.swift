@@ -12,13 +12,18 @@ struct Card<Content: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             content
         }
-        .background(Color(.systemBackground)) // bg-card
-        .cornerRadius(12) // rounded-xl
+        // Use a background style that adapts to the environment
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .background(Material.regular) // Provides a native blurred/adaptive look
+        )
+        .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(.separator).opacity(0.5), lineWidth: 1) // border
+                // Use primary/secondary with low opacity to mimic 'separator'
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1) // shadow
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
 

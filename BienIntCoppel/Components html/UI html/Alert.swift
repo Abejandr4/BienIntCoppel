@@ -1,14 +1,17 @@
 import SwiftUI
+import SwiftUI
 
-// 1. Definimos las variantes (Equivalente a alertVariants)
 enum AlertVariant {
     case `default`
     case destructive
     
     var backgroundColor: Color {
         switch self {
-        case .default: return Color(.systemBackground)
-        case .destructive: return Color.red.opacity(0.1)
+        case .default:
+            // Standard SwiftUI way to get the primary background
+            return Color.primary.opacity(0.0)
+        case .destructive:
+            return Color.red.opacity(0.1)
         }
     }
     
@@ -21,8 +24,11 @@ enum AlertVariant {
     
     var borderColor: Color {
         switch self {
-        case .default: return Color(.separator)
-        case .destructive: return .red.opacity(0.5)
+        case .default:
+            // Pure SwiftUI alternative to 'separator'
+            return Color.secondary.opacity(0.2)
+        case .destructive:
+            return .red.opacity(0.5)
         }
     }
 }
