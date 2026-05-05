@@ -244,6 +244,16 @@ struct ExerciseDetailSheet: View {
                             .cornerRadius(14)
                     }
                     .padding(.top, 8)
+                    Button(action: { dismiss() }) {
+                        Text("Compartir")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(exercise.iconColor)
+                            .cornerRadius(14)
+                    }
+                    .padding(.top, 8)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)

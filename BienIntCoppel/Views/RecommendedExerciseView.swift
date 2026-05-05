@@ -11,6 +11,7 @@ struct RecommendedExerciseView: View {
     @ObservedObject private var tracker = UserInteractionTracker.shared
     @State private var perfil: PerfilUsuario = .inactivo
     @State private var ejercicioRecomendado: MentalExercise? = nil
+    @State private var mostrarDetalle = false
     
     // Ejercicios del JSON
     private let ejercicios = ExercisesData.all
@@ -71,10 +72,9 @@ struct RecommendedExerciseView: View {
                     Spacer()
                     
                     Button(action: {
-                        // Registra el clic al iniciar el ejercicio
                         let categoria = categoriaDelEjercicio(ejercicio)
                         tracker.registrarClic(categoria: categoria)
-                        // Aquí puedes navegar a la pantalla del ejercicio
+                        mostrarDetalle = true
                     }) {
                         Image(systemName: "play.fill")
                             .font(.system(size: 13))
@@ -98,6 +98,11 @@ struct RecommendedExerciseView: View {
                         .stroke(Color.white.opacity(0.6), lineWidth: 1)
                 )
                 .padding(.horizontal)
+                .sheet(isPresented: $mostrarDetalle) {
+                    if let ejercicio = ejercicioRecomendado {
+                        ExerciseDetailSheet(exercise: ejercicio)
+                    }
+                }
             }
         }
         .padding(.top, 16)

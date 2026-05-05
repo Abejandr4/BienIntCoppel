@@ -59,7 +59,11 @@ struct MentalWellnessView: View {
                 VStack(spacing: 10) {
                     CompanyStatsView()
                     StressChartView()
-                    QuestionnaireView()
+                    Banner(
+                        title: "Toma un rápido cuestionario.",
+                        description: "Así, puedes llevar una vida más sana a largo plazo.",
+                        intensity: 25
+                    )
                     RecommendedExerciseView(scoresCuestionario: 50)
                     MentalExercisesView()
                     

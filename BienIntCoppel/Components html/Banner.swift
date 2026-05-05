@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct Banner: View {
-    // Passed-in variables
     let title: String
     let description: String?
     let intensity: Int
+    let shouldPulse: Bool // New control variable
     
     @State private var showQuestionnaire = false
     @State private var isPulsing = false
@@ -14,9 +14,16 @@ struct Banner: View {
         Double(max(0, min(intensity, 100))) / 100.0
     }
 
+    // Default initializer to make 'shouldPulse' false by default
+    init(title: String, description: String?, intensity: Int, shouldPulse: Bool = false) {
+        self.title = title
+        self.description = description
+        self.intensity = intensity
+        self.shouldPulse = shouldPulse
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Content using the passed variables
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
@@ -56,26 +63,24 @@ struct Banner: View {
                         )
                 )
         )
-        
+        // Pulse logic based on State
         .scaleEffect(isPulsing ? 1.02 : 1.0)
-                
-                .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(Color.purple.opacity(opacityLevel * 0.2), lineWidth: 1)
-                )
-        
+        .overlay(
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .stroke(Color.purple.opacity(opacityLevel * 0.2), lineWidth: 1)
+        )
         .padding(.horizontal)
-        // Presentation logic
-        
         .onAppear {
-                    withAnimation(
-                        .easeInOut(duration: 0.6) // 2 seconds for a soft "breath"
-                        .repeatForever(autoreverses: true)
-                    ) {
-                        isPulsing = true
-                    }
+            // Only trigger animation if the constant is true
+            if shouldPulse {
+                withAnimation(
+                    .easeInOut(duration: 0.8)
+                    .repeatForever(autoreverses: true)
+                ) {
+                    isPulsing = true
                 }
-        
+            }
+        }
         .sheet(isPresented: $showQuestionnaire) {
             QuestionnaireContainer(isPresented: $showQuestionnaire)
         }
@@ -83,44 +88,57 @@ struct Banner: View {
 }
 
 // Wrapper to handle the Navigation and the "Big X"
+// Wrapper to handle the Navigation and the "Big X"
 struct QuestionnaireContainer: View {
-    @Binding var isPresented: Bool
+    @Binding var isPresented: Bool // Binding ensures the state is shared with the Banner
     
     var body: some View {
         NavigationStack {
-            QuestionnaireView() // Your actual view file
+            QuestionnaireView() // This is where the AI-generated questions will appear
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { isPresented = false }) {
+                        // The "Big X" button to opt out and dismiss the view
+                        Button(action: { isPresented = false }) { // Directly toggles the sheet visibility
                             Image(systemName: "xmark.circle.fill")
                                 .font(.system(size: 24))
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundColor(.secondary)
                         }
+                        .accessibilityLabel("Cerrar cuestionario") // Accessibility for users
                     }
                 }
         }
     }
 }
 
-
-
 // MARK: - Preview
 struct Banner_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Color(white: 0.98).ignoresSafeArea()
-            VStack(spacing: 20) {
+            VStack(spacing: 30) {
+                
+                Text("Banner Estático (Default)")
+                    .font(.caption).bold().foregroundColor(.secondary)
+                
+                // Static version
                 Banner(
-                    title: "Bienestar Espiritual",
-                    description: "Encuentra paz interior con sesiones de meditación guiada.",
-                    intensity: 80
+                    title: "Paz Interior",
+                    description: "Este banner no se mueve por defecto.",
+                    intensity: 40
                 )
                 
+                Divider().padding()
+                
+                Text("Banner con Movimiento (Pulsing)")
+                    .font(.caption).bold().foregroundColor(.secondary)
+                
+                // Animated version
                 Banner(
-                    title: "Baja Intensidad",
-                    description: "Esta es una versión más sutil del banner.",
-                    intensity: 20
+                    title: "Alerta de Riesgo",
+                    description: "Este banner utiliza el parámetro shouldPulse: true.",
+                    intensity: 90,
+                    shouldPulse: true
                 )
             }
         }
