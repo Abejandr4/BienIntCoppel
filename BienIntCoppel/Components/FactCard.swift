@@ -28,9 +28,8 @@ struct FactCardView: View {
                     .foregroundStyle(.yellow)
                 
                 Spacer()
-                Image(systemName: "lightbulb") 
-                    .font(.title)
-                    .foregroundStyle(.yellow)
+                
+               
             }
             
             Text(ficha.normalText)
