@@ -62,21 +62,20 @@ struct QuestionnaireEntry: Codable, Identifiable {
     let responses: [QuestionResponse]   // 1 o 2 respuestas por sesión
 }
 
-// MARK: - Banco de preguntas
+// MARK: - Banco de preguntas para FALLBACK heurístico
 
 struct QuestionBank {
     
     // ─────────────────────────────────────────────
     // 1. CARGA LABORAL
-    // ─────────────────────────────────────────────
     
     static let cargaLaboral: [BurnoutQuestion] = [
         
         BurnoutQuestion(
             dimension: .cargaLaboral,
             type: .multipleChoiceEmoji,
-            text: "¿Cuántas horas estuviste hoy de pie en el piso de ventas o frente a la ventanilla?",
-            options: ["⏱️ Menos de 4 h", "⏱️ 4–6 h", "⏱️ 6–8 h", "⏱️ Más de 8 h"],
+            text: "¿Sientes que te moviste lo suficiente hoy?",
+            options: ["La cantidad justa", "Me faltó algo", "Me pasé tantito", "Demasiado, estoy cerca del dolor"],
             riskWeights: [0, 1, 2, 3]
         ),
         
@@ -99,15 +98,15 @@ struct QuestionBank {
             dimension: .cargaLaboral,
             type: .emojiOnly,
             text: "¿Con qué emoji describirías tu jornada de hoy?",
-            options: ["😤", "😩", "😐", "🙂", "💪"],
-            riskWeights: [2, 3, 1, 0, 0]
+            options: ["😡", "😭", "😐", "🙂", "😁"],
+            riskWeights: [3, 3, 2, 0, 0]
         ),
 
         BurnoutQuestion(
             dimension: .agotamientoEmocional,
             type: .emojiOnly,
             text: "¿Cómo está tu batería emocional ahora mismo?",
-            options: ["🪫", "😮‍💨", "😐", "🔋", "⚡"],
+            options: ["🪫", "🥱", "😐", "🔋", "⚡"],
             riskWeights: [3, 2, 1, 0, 0]
         ),
         BurnoutQuestion(
@@ -128,7 +127,7 @@ struct QuestionBank {
             dimension: .indicadoresFisicos,
             type: .emojiOnly,
             text: "¿Cómo está tu cuerpo en este momento?",
-            options: ["🤕", "😣", "😐", "🙂", "💪"],
+            options: ["🤕", "😣", "😐", "🙂", "💪💯"],
             riskWeights: [3, 2, 1, 0, 0]
         ),
         
@@ -154,7 +153,6 @@ struct QuestionBank {
     
     // ─────────────────────────────────────────────
     // 2. AGOTAMIENTO EMOCIONAL
-    // ─────────────────────────────────────────────
     
     static let agotamientoEmocional: [BurnoutQuestion] = [
         
@@ -169,21 +167,21 @@ struct QuestionBank {
         BurnoutQuestion(
             dimension: .agotamientoEmocional,
             type: .multipleChoiceText,
-            text: "Al terminar tu turno, ¿cómo describes tu energía para el resto del día?",
+            text: "¿Cómo describirías tu energía al terminar tu turno de ayer u hoy?",
             options: [
                 "Tengo energía para mi familia, proyectos o descansar bien",
                 "Estoy cansado/a pero puedo con lo básico en casa",
                 "Llego agotado/a y solo quiero no hablar con nadie",
                 "Siento un vacío emocional, como si no quedara nada de mí"
             ],
-            riskWeights: [0, 1, 2, 3]
+            riskWeights: [0, 1, 3, 3]
         ),
         
         BurnoutQuestion(
             dimension: .agotamientoEmocional,
             type: .multipleChoiceEmoji,
             text: "¿Cómo fue tu descanso anoche?",
-            options: ["😴 Dormí bien y me desconecté", "🙂 Regular, algo de insomnio", "😟 Me desperté pensando en el trabajo", "😰 Casi no dormí por la presión"],
+            options: ["😴 Dormí bien y me desconecté", "🙂 Regular, algo de insomnio", "😟 Me desperté pensando en el trabajo", "😰 Casi no pude dormir"],
             riskWeights: [0, 1, 2, 3]
         ),
         
@@ -196,7 +194,6 @@ struct QuestionBank {
     
     // ─────────────────────────────────────────────
     // 3. DESPERSONALIZACIÓN
-    // ─────────────────────────────────────────────
     
     static let despersonalizacion: [BurnoutQuestion] = [
         
@@ -243,7 +240,6 @@ struct QuestionBank {
     
     // ─────────────────────────────────────────────
     // 4. REALIZACIÓN PERSONAL
-    // ─────────────────────────────────────────────
     
     static let realizacionPersonal: [BurnoutQuestion] = [
         
