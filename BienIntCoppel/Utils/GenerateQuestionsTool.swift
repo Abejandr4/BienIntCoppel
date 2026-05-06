@@ -6,28 +6,31 @@ import FoundationModels
 @Generable
 struct AIGeneratedQuestion {
     @Guide(description: """
-        Dimensión de burnout. Valores válidos exactos:
+        Dimensión o categoría relacionada al burnout. 
+        Valores válidos exactos:
         cargaLaboral, agotamientoEmocional, despersonalizacion,
         realizacionPersonal, indicadoresFisicos
         """)
     var dimension: String
 
     @Guide(description: """
-        Tipo de pregunta. Valores válidos exactos:
+        El tipo de la pregunta. Valores válidos exactos:
         openText, multipleChoiceText, multipleChoiceEmoji, emojiOnly
         """)
     var type: String
 
     @Guide(description: """
         Texto de la pregunta en español, empático,
-        contextualizado en el trabajo en Coppel.
+        contextualizado en el trabajo en la empresa Coppel sin especificar
+        un puesto
         """)
     var text: String
 
     @Guide(description: """
         Opciones de respuesta. Reglas por tipo:
         - openText: dejar vacío []
-        - multipleChoiceText: 4 frases descriptivas, de mejor (índice 0) a peor estado (índice 3)
+        - multipleChoiceText: 4 frases descriptivas, de mejor (índice 0) a peor estado (índice 3), no
+        necesariamente uno de cada uno
         - multipleChoiceEmoji: 4 opciones, cada una comienza con un emoji seguido de texto
         - emojiOnly: 5 emojis solos, de mejor (índice 0) a peor estado (índice 4)
         """)
