@@ -83,12 +83,12 @@ struct ExercisesData {
         ),
         MentalExercise(
             title: "Cambio de Presencia",
-            benefit: "Pausa deliberada antes de una nueva tarea.",
-            icon: "clock.arrow.2.dotpath",
+            benefit: "Limpieza mental y eliminación del ruido.",
+            icon: "clock.arrow.2.circlepath",
             colors: [Color(red: 0.90, green: 0.98, blue: 0.94), Color.white],
             iconColor: .green,
             duration: "1 min",
-            description: "Pausa deliberada antes de una nueva tarea para observar una sensación física inmediata."
+            description: "Al terminar una tarea, haz una pausa de 60 segundos antes de la siguiente. Respira hondo y enfoca tu atención en una sensación física presente."
         ),
         MentalExercise(
             title: "Alimentación Consciente",

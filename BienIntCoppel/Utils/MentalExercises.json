@@ -81,12 +81,12 @@
     "id": "II-C",
     "category": "Mindfulness",
     "title": "Cambio de Presencia (One-Minute Transition)",
-    "benefit": "Cambio de Presencia (One-Minute Transition)",
-    "icon": "clock.arrow.2.dotpath",
+    "benefit": "Limpieza mental y eliminación del ruido residual de tareas o llamadas previas.",
+    "icon": "clock.arrow.2.circlepath",
     "colors": ["mintLight", "white"],
     "iconColor": "green",
     "duration": "1 min",
-    "description": "Pausa deliberada antes de una nueva tarea para observar una sensación física inmediata."
+    "description": "Al terminar una tarea, haz una pausa de 60 segundos antes de la siguiente. Respira hondo y enfoca tu atención en una sensación física presente (como el apoyo en la silla o sonidos ambientales) para anclarte al momento."
   },
   {
     "id": "II-D",

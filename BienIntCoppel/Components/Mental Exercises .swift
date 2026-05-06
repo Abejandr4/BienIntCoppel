@@ -21,11 +21,11 @@ struct MentalExercisesView: View {
             VStack(spacing: 10) {
                 ForEach(categorias, id: \.nombre) { categoria in
                     CategoriaSection(
-                        nombre:    categoria.nombre,
-                        icono:     categoria.icono,
-                        color:     categoria.color,
+                        nombre:     categoria.nombre,
+                        icono:      categoria.icono,
+                        color:      categoria.color,
                         ejercicios: categoria.ejercicios,
-                        expandida: $expandida
+                        expandida:  $expandida
                     )
                 }
             }
@@ -130,6 +130,7 @@ struct ExerciseRow: View {
                 Text(exercise.title)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
                 Text(exercise.benefit)
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
@@ -176,12 +177,37 @@ struct ExerciseDetailSheet: View {
     var body: some View {
         VStack(spacing: 0) {
 
-            // Handle
-            RoundedRectangle(cornerRadius: 3)
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 40, height: 5)
-                .padding(.top, 12)
+            // Handle + barra superior con Compartir
+            VStack(spacing: 12) {
+                // Línea de drag
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(width: 40, height: 5)
 
+                // Solo Compartir arriba a la derecha
+                HStack {
+                    Spacer()
+
+                    Button(action: { /* acción compartir */ }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 13, weight: .medium))
+                            Text("Compartir")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .foregroundColor(exercise.iconColor)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(exercise.iconColor.opacity(0.1))
+                        .cornerRadius(20)
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+
+            // Contenido scrolleable
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
 
@@ -237,37 +263,35 @@ struct ExerciseDetailSheet: View {
                             .lineSpacing(6)
                     }
 
-                    // Botón cerrar
-                    Button(action: { dismiss() }) {
-                        Text("Cerrar")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(exercise.iconColor)
-                            .cornerRadius(14)
-                    }
-                    .padding(.top, 8)
-                    Button(action: { dismiss() }) {
-                        Text("Compartir")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(exercise.iconColor)
-                            .cornerRadius(14)
-                    }
-                    .padding(.top, 8)
+                    Spacer(minLength: 20)
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 40)
+                .padding(.bottom, 20)
+            }
+
+            // Botón Cerrar fijo al fondo
+            Divider()
+            Button(action: { dismiss() }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
+                    Text("Cerrar")
+                        .font(.system(size: 15, weight: .medium))
+                }
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color(.systemGray6))
+                .cornerRadius(14)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
             }
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
+        .presentationBackground(.regularMaterial)
     }
 }
-
 
 // MARK: - Preview
 struct MentalExercisesView_Previews: PreviewProvider {
