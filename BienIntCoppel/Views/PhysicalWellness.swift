@@ -331,6 +331,7 @@ struct PhysicalWellnessView: View {
                                 .font(.subheadline)
                                 .fontWeight(.bold)
                                 .foregroundColor(.primary)
+                                .multilineTextAlignment(.leading)
                             Text(item.desc)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
