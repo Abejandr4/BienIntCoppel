@@ -6,70 +6,95 @@ struct QuestionnaireView: View {
     @StateObject private var store = QuestionnaireStore()
     @StateObject private var vm: QuestionnaireViewModel
     @EnvironmentObject var appState: AppState
+    @Binding var isPresented: Bool
     @State private var showContactsView = false
     @State private var isHeaderVisible = true
     @State private var showCompletionScreen = false
-    
     
     @ScaledMetric private var baseFontSize: CGFloat = 14
     @ScaledMetric private var smallFontSize: CGFloat = 12
     @ScaledMetric private var iconSize: CGFloat = 16
     @ScaledMetric private var cardPadding: CGFloat = 20
     
-    init() {
+    init(isPresented: Binding<Bool>) {
+        self._isPresented = isPresented
         let s = QuestionnaireStore()
         _store = StateObject(wrappedValue: s)
         _vm = StateObject(wrappedValue: QuestionnaireViewModel(store: s))
     }
     
     var body: some View {
-        if showCompletionScreen {
-            CompletionView()
-        } else {
-            NavigationStack {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        
-                        if isHeaderVisible {
-                            headerCard
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
-                        
-                        if vm.isLoading {
-                            loadingCard
-                        } else {
-                            ForEach(vm.activeQuestions) { question in
-                                questionCard(for: question)
+        ZStack(alignment: .top) {
+            
+            // MARK: - Contenido principal
+            Group {
+                if showCompletionScreen {
+                    CompletionView(isPresented: $isPresented)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                } else {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            Spacer().frame(height: 56)
+                            
+                            if isHeaderVisible {
+                                headerCard
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
                             }
-                            submitButton
+                            
+                            if vm.isLoading {
+                                loadingCard
+                            } else {
+                                ForEach(vm.activeQuestions) { question in
+                                    questionCard(for: question)
+                                }
+                                submitButton
+                            }
+                            
+                            if let error = vm.errorMessage {
+                                Text(error)
+                                    .font(.callout)
+                                    .foregroundColor(Color(red: 0.8, green: 0.1, blue: 0.1))
+                                    .padding(.horizontal)
+                            }
                         }
-                        
-                        if let error = vm.errorMessage {
-                            Text(error)
-                                .font(.callout)
-                                .foregroundColor(Color(red: 0.8, green: 0.1, blue: 0.1))
-                                .padding(.horizontal)
-                        }
+                        .animation(.spring(), value: isHeaderVisible)
+                        .padding(.horizontal)
+                        .padding(.bottom, 40)
                     }
-                    .animation(.spring(), value: isHeaderVisible)
-                    .padding(.horizontal)
-                    .padding(.top, 16)
-                    .padding(.bottom, 40)
-                }
-                .background(Color(white: 0.97).ignoresSafeArea())
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationDestination(isPresented: $showContactsView) {
-                    ContactosView()
+                    .background(Color(white: 0.97).ignoresSafeArea())
                 }
             }
-            .onAppear {
-                store.onEntrySaved = { entries in
-                    appState.update(from: entries)
+            
+            // MARK: - Barra flotante (siempre visible)
+            HStack {
+                Spacer()
+                Capsule()
+                    .fill(Color(white: 0.78))
+                    .frame(width: 36, height: 4)
+                Spacer()
+                Button(action: { isPresented = false }) {
+                    ZStack {
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(Color(white: 0.25))
+                    }
+                    .shadow(color: .black.opacity(0.12), radius: 4, x: 0, y: 2)
                 }
+                .padding(.trailing, 16)
+                .accessibilityLabel("Cerrar cuestionario")
+            }
+            .padding(.top, 12)
+            .zIndex(99)
+        }
+        .onAppear {
+            store.onEntrySaved = { entries in
+                appState.update(from: entries)
             }
         }
     }
-    
     
     // MARK: - Question card
     
@@ -79,7 +104,6 @@ struct QuestionnaireView: View {
             dimensionBadge(question.dimension)
             Text(question.text)
                 .font(.system(size: baseFontSize, weight: .semibold, design: .rounded))
-            // Alto contraste: casi negro sobre fondo claro
                 .foregroundColor(Color(white: 0.12))
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
@@ -88,7 +112,6 @@ struct QuestionnaireView: View {
         .padding(cardPadding)
         .background(cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 20))
-        // Agrupa la card como una unidad para VoiceOver
         .accessibilityElement(children: .contain)
     }
     
@@ -118,7 +141,6 @@ struct QuestionnaireView: View {
             if (vm.textAnswers[question.id] ?? "").isEmpty {
                 Text("Escribe aquí...")
                     .font(.system(size: smallFontSize + 1))
-                // Suficiente contraste para placeholder: ratio ~4.6:1
                     .foregroundColor(Color(white: 0.45))
                     .padding(EdgeInsets(top: 10, leading: 6, bottom: 0, trailing: 0))
                     .accessibilityHidden(true)
@@ -136,7 +158,6 @@ struct QuestionnaireView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-            // Borde más visible: gris 50% en lugar de 20%
                 .stroke(Color(white: 0.5).opacity(0.4), lineWidth: 1.5)
         )
     }
@@ -147,7 +168,6 @@ struct QuestionnaireView: View {
         VStack(spacing: emojiStyle ? 8 : 10) {
             ForEach(Array((question.options ?? []).enumerated()), id: \.offset) { index, option in
                 let isSelected = vm.selectedOptions[question.id]?.index == index
-                
                 Button {
                     vm.selectedOptions[question.id] = (index: index, text: option)
                 } label: {
@@ -160,11 +180,10 @@ struct QuestionnaireView: View {
                         } else {
                             Image(systemName: isSelected
                                   ? "checkmark.circle.fill" : "circle")
-                            // Naranja oscuro para contraste suficiente sobre blanco
-                            .foregroundColor(isSelected
-                                             ? Color(red: 0.75, green: 0.35, blue: 0.0)
-                                             : Color(white: 0.45))
-                            .font(.system(size: iconSize))
+                                .foregroundColor(isSelected
+                                    ? Color(red: 0.75, green: 0.35, blue: 0.0)
+                                    : Color(white: 0.45))
+                                .font(.system(size: iconSize))
                             Text(option)
                                 .font(.system(size: smallFontSize + 1, design: .rounded))
                                 .foregroundColor(Color(white: 0.12))
@@ -173,7 +192,6 @@ struct QuestionnaireView: View {
                         }
                     }
                     .padding(emojiStyle ? 10 : 12)
-                    // Altura mínima de toque: 44pt recomendado por Apple HIG
                     .frame(minHeight: 44)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
@@ -201,12 +219,10 @@ struct QuestionnaireView: View {
         HStack(spacing: 8) {
             ForEach(Array((question.options ?? []).enumerated()), id: \.offset) { index, emoji in
                 let isSelected = vm.selectedOptions[question.id]?.index == index
-                
                 Button {
                     vm.selectedOptions[question.id] = (index: index, text: emoji)
                 } label: {
                     Text(emoji)
-                    // Emoji más grande para facilitar el toque
                         .font(.system(size: 34))
                         .frame(maxWidth: .infinity)
                         .frame(minHeight: 54)
@@ -253,7 +269,6 @@ struct QuestionnaireView: View {
     
     private func dimensionStyle(_ d: BurnoutDimension) -> (String, Color, String) {
         switch d {
-            // Colores ajustados para contraste suficiente sobre sus fondos claros
         case .cargaLaboral:         return ("Carga laboral",
                                             Color(red: 0.75, green: 0.35, blue: 0.0), "briefcase")
         case .agotamientoEmocional: return ("Agotamiento",
@@ -267,50 +282,25 @@ struct QuestionnaireView: View {
         }
     }
     
-    // MARK: - Cards
-    
-    private var recommendationBanner: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
-                Image(systemName: "lightbulb.fill")
-                    .font(.system(size: smallFontSize - 1))
-                    .foregroundColor(Color(red: 0.75, green: 0.35, blue: 0.0))
-                Text("Un pequeño paso puede ayudar")
-                    .font(.system(size: smallFontSize, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0.75, green: 0.35, blue: 0.0))
-            }
-        }
-        
-        .padding(14)
-        .background(Color(red: 1.0, green: 0.95, blue: 0.87))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Color(red: 0.75, green: 0.35, blue: 0.0).opacity(0.3), lineWidth: 1.5)
-        )
-        .accessibilityElement(children: .combine)
-    }
+    // MARK: - Static cards
     
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 15) {
-                ZStack {
-                    Image(systemName: "doc.text.magnifyingglass")
-                        .font(.system(size: 18))
-                        .foregroundColor(Color(red: 0.75, green: 0.35, blue: 0.0))
-                }
-                .accessibilityHidden(true)
-                
-                VStack() {
+                Image(systemName: "doc.text.magnifyingglass")
+                    .font(.system(size: 18))
+                    .foregroundColor(Color(red: 0.75, green: 0.35, blue: 0.0))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Cuestionario de Seguimiento")
-                        .fontWeight(.bold)
+                        .font(.system(size: baseFontSize, weight: .bold, design: .rounded))
                         .foregroundColor(Color(white: 0.12))
-                        .padding(.trailing, 85)
                     Text("Responde con honestidad para un mejor resultado. La empresa no puede acceder a tus respuestas.")
+                        .font(.system(size: smallFontSize, design: .rounded))
                         .fontWeight(.light)
                         .foregroundColor(Color(white: 0.3))
                         .lineSpacing(2)
-                    
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
                 Button(action: { isHeaderVisible = false }) {
@@ -388,10 +378,10 @@ struct QuestionnaireView: View {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
-        
-    }}
+    }
+}
 
 #Preview {
-    QuestionnaireView()
+    QuestionnaireView(isPresented: .constant(true))
         .environmentObject(AppState())
 }

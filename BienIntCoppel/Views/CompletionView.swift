@@ -4,9 +4,14 @@ struct CompletionView: View {
     
     @EnvironmentObject var appState: AppState
     @ScaledMetric private var iconSize: CGFloat = 64
+    @Binding var isPresented: Bool
     
     // Elegir un ejercicio aleatorio una sola vez al aparecer la vista
     @State private var randomExercise: MentalExercise = ExercisesData.all.randomElement()!
+    
+    init(isPresented: Binding<Bool>) {               // ← añadir
+            self._isPresented = isPresented
+        }
     
     private var headline: String {
         switch appState.alertLevel {

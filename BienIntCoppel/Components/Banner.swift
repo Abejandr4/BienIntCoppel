@@ -95,25 +95,16 @@ struct QuestionnaireContainer: View {
     @Binding var isPresented: Bool
     
     var body: some View {
-        NavigationStack {
-            QuestionnaireView()
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: { isPresented = false }) {
-                            Image(systemName: "xmark.circle.fill")
-                                // Making the icon "notorious" with a heavy weight and red color
-                                .font(.system(size: 28, weight: .bold))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .red) // White 'X', Red background
-                        }
-                        .accessibilityLabel("Cerrar cuestionario")
-                    }
-                }
-        }
-        // This creates the "smaller than screen" look (iOS 16+)
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
-        .cornerRadius(25) // Rounds the corners of the sheet
+        QuestionnaireView(isPresented: $isPresented)
+            // Tamaños: arranca en .medium, se puede expandir a casi-full
+            .presentationDetents([.fraction(0.72), .large])
+            .presentationDragIndicator(.hidden)      // usamos nuestro propio indicador
+            .presentationCornerRadius(32)            // esquinas más redondeadas
+            .presentationBackground(                 // fondo blur glassmorphism
+                .ultraThinMaterial
+            )
+            // Permite ver el contenido de atrás translúcido
+            .presentationBackgroundInteraction(.disabled)
     }
 }
 

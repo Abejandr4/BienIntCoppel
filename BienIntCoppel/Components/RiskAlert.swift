@@ -139,3 +139,18 @@ struct RiskAlertBanner: View {
         }
     }
 }
+
+#Preview {
+    ZStack(alignment: .top) {
+        // Fondo para simular la app detrás del banner
+        Color(red: 253/255, green: 251/255, blue: 246/255)
+            .ignoresSafeArea()
+        
+        RiskAlertBanner(
+            store: QuestionnaireStore(),
+            showContactsView: .constant(false),
+            isVisible: .constant(true)
+        )
+        .padding(.top, 30)
+    }
+}

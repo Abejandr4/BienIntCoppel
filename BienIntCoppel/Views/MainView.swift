@@ -1,8 +1,13 @@
 import SwiftUI
 internal import Combine
 
-// MARK: - MainView Refactorizado
+// MARK: - MainView
 struct MainView: View {
+    
+    @EnvironmentObject var appState: AppState
+    @State private var showRiskBanner = false
+    @State private var showContactsView = false
+    
     let categories = [
         WellnessCardModel(
             title: "Bienestar Físico",
@@ -46,68 +51,95 @@ struct MainView: View {
     let textColorDark = Color(red: 43/255, green: 43/255, blue: 43/255)
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                backgroundColor.ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 25) {
-                        HeaderView()
-                        
-                        VStack(alignment: .leading, spacing: 16) {
-                            
-                            // Tarjeta animada con Coppelia, nube de pensamiento y botón
-                            AnimatedParticleCard()
-                                .padding(.horizontal)
-                                .padding(.bottom, 5)
-                            
-                            Text("Tu Bienestar Integral")
-                                .font(.custom("Poppins-Bold", size: 22))
-                                .foregroundColor(textColorDark)
-                                .padding(.horizontal)
-                            
-                            LazyVGrid(
-                                columns: [
-                                    GridItem(.flexible(), spacing: 20),
-                                    GridItem(.flexible())
-                                ],
-                                spacing: 20
-                            ) {
-                                ForEach(categories) { item in
-                                    if let dest = item.destination {
-                                        NavigationLink(destination: dest) {
+        ZStack(alignment: .top) {
+            NavigationStack {
+                ZStack {
+                    backgroundColor.ignoresSafeArea()
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 25) {
+                            HeaderView()
+                            VStack(alignment: .leading, spacing: 16) {
+                                AnimatedParticleCard()
+                                    .padding(.horizontal)
+                                    .padding(.bottom, 5)
+                                Text("Tu Bienestar Integral")
+                                    .font(.custom("Poppins-Bold", size: 22))
+                                    .foregroundColor(textColorDark)
+                                    .padding(.horizontal)
+                                LazyVGrid(
+                                    columns: [
+                                        GridItem(.flexible(), spacing: 20),
+                                        GridItem(.flexible())
+                                    ],
+                                    spacing: 20
+                                ) {
+                                    ForEach(categories) { item in
+                                        if let dest = item.destination {
+                                            NavigationLink(destination: dest) {
+                                                WellnessCardView(data: item)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        } else {
                                             WellnessCardView(data: item)
                                         }
-                                        .buttonStyle(PlainButtonStyle())
-                                    } else {
-                                        WellnessCardView(data: item)
                                     }
                                 }
-                            }
-                            .padding(.horizontal)
-                            
-                            Text("Noticias Coppel")
-                                .font(.custom("Poppins-Bold", size: 18))
-                                .foregroundColor(textColorDark)
                                 .padding(.horizontal)
-                                .padding(.top, 10)
-                            
-                            CoppelNewsCarousel()
-                                .padding(.bottom, 30)
+                                Text("Noticias Coppel")
+                                    .font(.custom("Poppins-Bold", size: 18))
+                                    .foregroundColor(textColorDark)
+                                    .padding(.horizontal)
+                                    .padding(.top, 10)
+                                CoppelNewsCarousel()
+                                    .padding(.bottom, 30)
+                            }
                         }
                     }
+                    .edgesIgnoringSafeArea(.top)
                 }
-                .edgesIgnoringSafeArea(.top)
+                .navigationDestination(isPresented: $showContactsView) {
+                    ContactosView()
+                }
+            }
+
+            // Banner flotante de riesgo
+            if showRiskBanner {
+                RiskAlertBanner(
+                    store: QuestionnaireStore(),
+                    showContactsView: $showContactsView,
+                    isVisible: $showRiskBanner
+                )
+                .transition(
+                    .asymmetric(
+                        insertion: .move(edge: .top).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    )
+                )
+                .zIndex(99)
+                .padding(.top, 8)
+            }
+        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: showRiskBanner)
+        .onChange(of: appState.alertLevel) { _, newLevel in
+            if newLevel.isAlarmante {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    withAnimation { showRiskBanner = true }
+                }
             }
         }
     }
 }
 
-// MARK: - Contenedor Principal de la Tarjeta Animada
+// MARK: - AnimatedParticleCard
 struct AnimatedParticleCard: View {
-    let animatedImages = ["Coppelia5", "Coppelia4", "Coppelia2", "Coppelia1", "Coppelia3", "Coppelia1", "Coppelia2", "Coppelia4"]
     
-    // Mensajes mixtos: tips de bienestar + normalización de salud mental
+    @EnvironmentObject var appState: AppState  // ← para pasarlo al sheet
+    @State private var showQuestionnaire = false  // ← vive aquí, no en MainView
+    
+    let animatedImages = ["Coppelia5", "Coppelia4", "Coppelia2",
+                          "Coppelia1", "Coppelia3", "Coppelia1",
+                          "Coppelia2", "Coppelia4"]
+    
     let thoughts = [
         "Pedir ayuda también es de valientes",
         "Recuerda tomar agua hoy",
@@ -120,22 +152,18 @@ struct AnimatedParticleCard: View {
         "Sonríe, te ves increíble hoy"
     ]
     
-    @State private var currentIndex = 0  // Coppelia — rápido
-    @State private var thoughtIndex = 0  // Mensajes — lento
+    @State private var currentIndex = 0
+    @State private var thoughtIndex = 0
 
-    // Timer para Coppelia (rápido)
-    let imageTimer = Timer.publish(every: 2.0, on: .main, in: .common).autoconnect()
-    // Timer para mensajes (lento)
+    let imageTimer  = Timer.publish(every: 2.0, on: .main, in: .common).autoconnect()
     let thoughtTimer = Timer.publish(every: 9.0, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack(spacing: 12) {
+            
             // Tarjeta con animación + nube
             ZStack {
-                // 1. Fondo de partículas
                 ParticleBackgroundView()
-                
-                // 2. Imagen a la izquierda + nube a la derecha
                 HStack(alignment: .center, spacing: 0) {
                     SmoothImageSequenceView(
                         images: animatedImages,
@@ -151,27 +179,21 @@ struct AnimatedParticleCard: View {
             .frame(height: 240)
             .cornerRadius(20)
             .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-            // Los dos timers se reciben aquí, cada uno controla su propio índice
-            .onReceive(imageTimer) { _ in
-                withAnimation {
-                    currentIndex = (currentIndex + 1) % animatedImages.count
-                }
+            .onReceive(imageTimer)  { _ in
+                withAnimation { currentIndex = (currentIndex + 1) % animatedImages.count }
             }
             .onReceive(thoughtTimer) { _ in
                 thoughtIndex = (thoughtIndex + 1) % thoughts.count
             }
-
-            // Botón debajo de la nube → navega al cuestionario
-            NavigationLink(destination: QuestionnaireView()) {
+            
+            // Botón → abre el cuestionario
+            Button(action: { showQuestionnaire = true }) {
                 HStack(spacing: 8) {
                     Image(systemName: "heart.text.square")
                         .font(.system(size: 24, weight: .semibold))
-                    
                     Text("¿Cómo te sientes hoy?")
                         .font(.custom("Poppins-SemiBold", size: 16))
-                    
                     Spacer()
-                    
                     Image(systemName: "arrow.right")
                         .font(.system(size: 14, weight: .bold))
                 }
@@ -190,9 +212,17 @@ struct AnimatedParticleCard: View {
                     )
                 )
                 .cornerRadius(16)
-                .shadow(color: Color(red: 0.62, green: 0.55, blue: 0.85).opacity(0.35), radius: 8, x: 0, y: 4)
+                .shadow(
+                    color: Color(red: 0.62, green: 0.55, blue: 0.85).opacity(0.35),
+                    radius: 8, x: 0, y: 4
+                )
             }
             .buttonStyle(PlainButtonStyle())
+        }
+        // ← .sheet va en el VStack, no dentro del Button
+        .sheet(isPresented: $showQuestionnaire) {
+            QuestionnaireContainer(isPresented: $showQuestionnaire)
+                .environmentObject(appState)
         }
     }
 }
@@ -580,4 +610,5 @@ struct HeaderView: View {
 
 #Preview {
     MainView()
+        .environmentObject(AppState())
 }
