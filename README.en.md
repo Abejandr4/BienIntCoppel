@@ -148,4 +148,4 @@ BienIntCoppel/
 
 ## Authors
 
-Developed by [Abejandr4](https://github.com/Abejandr4) and team.
+Developed by [Alejandra](https://github.com/Abejandr4), [Myrahis](https://github.com/MyrahisYSanluis), [Valentina](https://github.com/Valoo-1201). 
